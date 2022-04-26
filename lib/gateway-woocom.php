@@ -17,17 +17,19 @@ class gateway_woocom extends WC_Payment_Gateway {
         $this->method_title = 'Go Cardless Open Banking';
         $this->method_description = 'Go Cardless open banking integration using the billing request flow';
 
-        // settings
-        $this->init_form_fields();
-        $this->init_settings();
+        if (!defined('DOING_AJAX') || !DOING_AJAX) {
+            // settings
+            $this->init_form_fields();
+            $this->init_settings();
 
-        $this->testMode = (bool) $this->get_option('woocommerce_gc_ob_wc_gateway_test_mode');
-        $this->sandboxToken = $this->get_option('woocommerce_gc_ob_wc_gateway_sandbox_access_token');
-        $this->liveToken = $this->get_option('woocommerce_gc_ob_wc_gateway_live_access_token');
+            // save settings hook
+            add_action( 'woocommerce_update_options_payment_gateways_' . $this->id, [$this, 'process_admin_options'] );
+        }
 
-        // save settings hook
-        add_action( 'woocommerce_update_options_payment_gateways_' . $this->id, [$this, 'process_admin_options'] );
-        
+        $this->testMode = (bool) $this->get_option('test_mode');
+        $this->sandboxToken = $this->get_option('sandbox_access_token');
+        $this->liveToken = $this->get_option('live_access_token');
+
         // enable
         if ($this->enabled !== 'no') {
             $this->active = true;
