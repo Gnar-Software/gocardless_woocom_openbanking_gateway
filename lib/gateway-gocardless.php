@@ -12,6 +12,7 @@ class gateway_gocardless {
     public $paymentAmount;
     public $paymentDescription;
     public $mode;
+    public $reuseCustomer;
 
 
     public function __construct($accesstoken, $apiBaseUrl, $testmode) {
@@ -39,12 +40,18 @@ class gateway_gocardless {
         // prepare order details
         $this->paymentAmount = $woocommerce->cart->total * 100;
         $this->paymentCurrency = get_woocommerce_currency();
-        $this->paymentDescription = 'test description, not sure what it should be yet';
+        $this->paymentDescription = $this->createPaymentDesc();
 
         $response['paymentAmount'] = $this->paymentAmount;
         $response['currency'] = $this->paymentCurrency;
         $response['paymentDescription'] = $this->paymentDescription;
         $response['mode'] = $this->mode;
+
+        
+        // customer
+        if ($this->reuseCustomer) {
+
+        }
 
 
         // billing request
@@ -157,6 +164,23 @@ class gateway_gocardless {
         curl_close($ch);
 
         return json_decode($response);
+    }
+
+
+    /**
+     *  CREATE PAYMENT DESCRIPTION
+     */
+
+    private function createPaymentDesc() {
+        global $woocommerce;
+        $paymentDescription = [];
+
+        foreach ( WC()->cart->get_cart() as $key => $val ) {
+            $product = $val['data'];
+            array_push($paymentDescription, $product->get_name());
+        }
+
+        return implode(', ', $paymentDescription);
     }
 }
 
