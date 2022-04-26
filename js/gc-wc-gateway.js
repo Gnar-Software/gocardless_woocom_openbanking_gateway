@@ -12,11 +12,17 @@
             // disable btn here todo
 
             // CHECK FORM IS VALIDATED
+
+
+            // GET ENTERED BILLING EMAIL
+            var billingEmail = $('input[name="billing_email"]');
+            console.log(billingEmail);
             
 
             // TRIGGER SERVER BILLING REQUEST
             var formdata = new FormData();
             formdata.append('action', 'initBillingRequest');
+            formdata.append('billing_email', billingEmail);
             ajaxTriggerBillingRequest(formdata);
 
         });

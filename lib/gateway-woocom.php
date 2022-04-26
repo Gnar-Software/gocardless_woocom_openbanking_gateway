@@ -4,6 +4,7 @@ class gateway_woocom extends WC_Payment_Gateway {
 
     public bool $testMode;
     public bool $active = false;
+    public bool $reuseCustomers;
     public string $sandboxToken;
     public string $liveToken;
 
@@ -29,6 +30,8 @@ class gateway_woocom extends WC_Payment_Gateway {
         $this->testMode = (bool) $this->get_option('test_mode');
         $this->sandboxToken = $this->get_option('sandbox_access_token');
         $this->liveToken = $this->get_option('live_access_token');
+        $this->reuseCustomers = $this->get_option('reuse_customers');
+        
 
         // enable
         if ($this->enabled !== 'no') {
@@ -75,6 +78,12 @@ class gateway_woocom extends WC_Payment_Gateway {
             'live_access_token' => array(
                 'title'   => 'Live access token',
                 'type'    => 'text'
+            ),
+            'reuse_customers' => array(
+                'title'   => 'Re-use customer records in GoCardless',
+                'type'    => 'checkbox',
+                'label'   => 'Re-uses a customer record in GoCardless based on their email (creates new record every time if disabled)',
+                'default' => 'yes'
             )
         );
 

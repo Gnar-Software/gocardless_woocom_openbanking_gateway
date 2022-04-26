@@ -13,9 +13,11 @@ class gateway_gocardless {
     public $paymentDescription;
     public $mode;
     public $reuseCustomer;
+    public $gcCustomerID;
 
 
-    public function __construct($accesstoken, $apiBaseUrl, $testmode) {
+    public function __construct($accesstoken, $apiBaseUrl, $testmode, $reusecustomer) {
+
         $this->accessToken = $accesstoken;
         $this->apiBaseURL = $apiBaseUrl;
         
@@ -25,7 +27,9 @@ class gateway_gocardless {
         else {
             $this->mode = 'sandbox';
         }
- 
+
+        $this->reuseCustomer = $reusecustomer;
+
     }
 
 
@@ -50,7 +54,10 @@ class gateway_gocardless {
         
         // customer
         if ($this->reuseCustomer) {
-
+            $customerEmail = $this->getCustomerEmail();
+            if (!empty($customerEmail)) {
+                $this->gcCustomerID = $this->retrieveCustomer($customerEmail);
+            }
         }
 
 
@@ -84,14 +91,38 @@ class gateway_gocardless {
             $response['BR_Flow_ID'] = $this->billingRequestFlowID;
         }
 
-
-        // register GC checkout script and localize?
-
-
-
         $response['status'] = 'success';
 
         die(json_encode($response));
+    }
+
+
+    /**
+     *  GET CUSTOMER EMAIL
+     */
+
+    private function getCustomerEmail() {
+
+        if (is_user_logged_in()) {
+            $current_user = wp_get_current_user();
+            return $current_user->user_email;
+        }
+        else {
+            if (!empty($_POST['billing_email'])) {
+                return empty($_POST['billing_email']);
+            }
+        }
+
+        return;
+    }
+
+
+    /**
+     *  RETRIEVE GC CUSTOMER
+     */
+
+    private function retrieveCustomer($customerEmail) {
+
     }
 
 
@@ -100,16 +131,35 @@ class gateway_gocardless {
      */
 
     public function createBillingRequest() {
+        $params = (object) [];
 
-        $params = (object) [
-            'billing_requests' => (object) [
-                'payment_request' => (object) [
-                    'currency'    => $this->paymentCurrency,
-                    'amount'      => $this->paymentAmount,
-                    'description' => $this->paymentDescription
+        // customer exists in GC
+        if (!empty($this->gcCustomerID)) {
+            $params = (object) [
+                'billing_requests' => (object) [
+                    'payment_request' => (object) [
+                        'currency'    => $this->paymentCurrency,
+                        'amount'      => $this->paymentAmount,
+                        'description' => $this->paymentDescription
+                    ]
                 ]
-            ]
-        ];
+            ];
+        }
+
+        // customer doesn't exist in GC
+        else {
+            $params = (object) [
+                'billing_requests' => (object) [
+                    'payment_request' => (object) [
+                        'currency'    => $this->paymentCurrency,
+                        'amount'      => $this->paymentAmount,
+                        'description' => $this->paymentDescription
+                    ]
+                ]
+            ];
+        }
+
+
 
         $response = $this->postAPIRequest($params, GC_BILLING_REQUEST_ENDPOINT);
 

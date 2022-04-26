@@ -76,16 +76,18 @@ class gc_ob_wc_gateway {
                 $this->gatewayGocardless = new gateway_gocardless(
                     $this->gatewayWoocom->sandboxToken,
                     GC_SANDBOX_API_BASE,
-                    $this->gatewayWoocom->testMode
+                    $this->gatewayWoocom->testMode,
+                    $this->gatewayWoocom->reuseCustomers
                 );
             }
     
-            // test mode
+            // live mode
             else {
                 $this->gatewayGocardless = new gateway_gocardless(
                     $this->gatewayWoocom->liveToken,
                     GC_LIVE_API_BASE,
-                    $this->gatewayWoocom->testMode
+                    $this->gatewayWoocom->testMode,
+                    $this->gatewayWoocom->reuseCustomers
                 );
             }
 
