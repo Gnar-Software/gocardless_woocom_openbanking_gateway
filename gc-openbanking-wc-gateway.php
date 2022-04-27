@@ -19,6 +19,7 @@ define( 'GC_SANDBOX_API_BASE',              'https://api-sandbox.gocardless.com/
 define( 'GC_LIVE_API_BASE',                 'https://api.gocardless.com/' );
 define( 'GC_BILLING_REQUEST_ENDPOINT',      'billing_requests' );
 define( 'GC_BILLING_REQUEST_FLOW_ENDPOINT', 'billing_request_flows' );
+define( 'GC_PAYMENTS_ENDPOINT',             'payments' );
 define( 'GC_API_VERSION',                   '2015-07-06' );
 define( 'WC_ORDER_RECIEVED_URL',            '/order-recieved' );
 

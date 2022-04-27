@@ -122,7 +122,7 @@ class gateway_gocardless {
      */
 
     private function retrieveCustomer($customerEmail) {
-
+        
     }
 
 
@@ -141,6 +141,9 @@ class gateway_gocardless {
                         'currency'    => $this->paymentCurrency,
                         'amount'      => $this->paymentAmount,
                         'description' => $this->paymentDescription
+                    ],
+                    'links'           => (object) [
+                        'customer'    => $this->gcCustomerID
                     ]
                 ]
             ];
@@ -158,7 +161,6 @@ class gateway_gocardless {
                 ]
             ];
         }
-
 
 
         $response = $this->postAPIRequest($params, GC_BILLING_REQUEST_ENDPOINT);
@@ -185,6 +187,48 @@ class gateway_gocardless {
         $response = $this->postAPIRequest($params, GC_BILLING_REQUEST_FLOW_ENDPOINT);
 
         return $response;
+    }
+
+    /**
+     *  CREATE PAYMENT DESCRIPTION
+     */
+
+    private function createPaymentDesc() {
+        global $woocommerce;
+        $paymentDescription = [];
+
+        foreach ( WC()->cart->get_cart() as $key => $val ) {
+            $product = $val['data'];
+            array_push($paymentDescription, $product->get_name());
+        }
+
+        return implode(', ', $paymentDescription);
+    }
+
+
+    /**
+     *  VERIFY PAYMENT
+     */
+
+    public function verifyPayment($paymentID) {
+
+        $paymentID = 'PM005528J5VQDM';
+
+        $getURL = $this->apiBaseURL . GC_PAYMENTS_ENDPOINT . '/' . $paymentID;
+        $response = $this->getAPIRequest($getURL);
+
+        error_log(json_encode($response), 0);
+
+        if ($response->payments->status == 'confirmed') {
+            return true;
+        }
+        elseif ($response->payments->status == 'failed') {
+            return false;
+        }
+        
+        // return true for pending_submission
+        return true;
+
     }
 
 
@@ -218,19 +262,26 @@ class gateway_gocardless {
 
 
     /**
-     *  CREATE PAYMENT DESCRIPTION
+     *  SEND API GET REQUEST
      */
 
-    private function createPaymentDesc() {
-        global $woocommerce;
-        $paymentDescription = [];
+    private function getAPIRequest($URI) {
+        $headers = [
+            'Content-Type: application/json',
+            'Authorization: Bearer ' . $this->accessToken,
+            'GoCardless-Version: ' . GC_API_VERSION
+        ];
+        
+        $ch = curl_init($URI);
 
-        foreach ( WC()->cart->get_cart() as $key => $val ) {
-            $product = $val['data'];
-            array_push($paymentDescription, $product->get_name());
-        }
+        curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_FOLLOWLOCATION, 1);
 
-        return implode(', ', $paymentDescription);
+        $response = curl_exec($ch);
+        curl_close($ch);
+
+        return json_decode($response);
     }
 }
 

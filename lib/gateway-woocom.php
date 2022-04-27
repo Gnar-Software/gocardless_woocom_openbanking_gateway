@@ -7,6 +7,9 @@ class gateway_woocom extends WC_Payment_Gateway {
     public bool $reuseCustomers;
     public string $sandboxToken;
     public string $liveToken;
+    public string $customerID;
+    public string $paymentRef;
+    public string $paymentID;
 
 
     public function __construct() {
@@ -107,14 +110,104 @@ class gateway_woocom extends WC_Payment_Gateway {
 
 
     /**
-     *   REGISTER SCRIPTS
+     *  CREATE ORDER
      */
 
-    public function registerScripts() {
+    public function process_payment($order_id) {
+        global $woocommerce;
 
+        $order = new WC_Order( $order_id );
 
+        // Payment errors
+        if (isset($_POST['gc_ob_error'])) {
+            if ($order->has_status('pending')) {
+                $order->add_order_note('GC Payment flow was not completed');
+            }
+            else {
+                $order->update_status('pending', __( 'GC Payment flow was not completed' , 'woocommerce' ));
+            }
+
+            wc_add_notice( __('GoCardless payment error: did not complete payment flow', 'woothemes'), 'error' );
+            return;
+        }
+
+        if (!isset($_POST['gc_ob_customer_id']) || !isset($_POST['gc_ob_payment_ref']) || !isset($_POST['gc_ob_payment_id'])) {
+            if ($order->has_status('pending')) {
+                $order->add_order_note('Error recieving payment reference from GC');
+            }
+            else {
+                $order->update_status('pending', __( 'Error recieving payment reference from GC' , 'woocommerce' ));
+            }
+
+            wc_add_notice( __('GoCardless payment error: error recieving payment reference from GC', 'woothemes'), 'error' );
+            return;
+        }
+
+        // Set payment details
+        $this->customerID = $_POST['gc_ob_customer_id'];
+        $this->paymentRef = $_POST['gc_ob_payment_ref'];
+        $this->paymentID  = $_POST['gc_ob_payment_id'];
+
+        // Verify payment
+        if (!$this->verifyPayment()) {
+            $order->update_status('failed', __( 'GC Payment was declined by the customers bank' , 'woocommerce' ));
+            wc_add_notice( __('GoCardless payment error: payment was declined by your bank', 'woothemes'), 'error' );
+            return;
+        }
+
+        // Payment success
+        $orderNote = 'Go Cardless Payment Succesful: CustomerID - ' . $this->customerID . ' PaymentRef - ' . $this->paymentRef . ' PaymentID - ' . $this->paymentID;
+        $order->update_status('processing', __( $orderNote , 'woocommerce' ));
+
+        // Empty cart
+        $woocommerce->cart->empty_cart();
+
+        // Return thankyou redirect
+        return array(
+            'result' => 'success',
+            'redirect' => $this->get_return_url( $order )
+        );
 
     }
+
+
+    /**
+     *  VERIFY PAYMENT WITH GO CARDLESS
+     */
+
+    public function verifyPayment() {
+
+        /**
+         *  Instantiate gocardless class as this is accessed 
+         *  by ajax and is out of context otherwise
+         */ 
+
+        $gatewayGocardless = (object) [];
+
+        if ($this->testMode) {
+            $gatewayGocardless = new gateway_gocardless(
+                $this->sandboxToken,
+                GC_SANDBOX_API_BASE,
+                $this->testMode,
+                $this->reuseCustomers
+            );
+        }
+        else {
+            $gatewayGocardless = new gateway_gocardless(
+                $this->liveToken,
+                GC_LIVE_API_BASE,
+                $this->testMode,
+                $this->reuseCustomers
+            );
+        }
+
+        // verify payment
+
+        return $gatewayGocardless->verifyPayment($this->paymentID);
+
+    }
+
+
 
 }
 
