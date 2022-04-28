@@ -94,22 +94,6 @@ class gateway_woocom extends WC_Payment_Gateway {
 
 
     /**
-     *  SAVE PAYMENT METHOD SETTING FIELDS (not required?)
-     */
-
-    public function saveGatewaySettings() {
-
-        $enabled = (!empty($_POST['woocommerce_gc_ob_wc_gateway_enabled'])) ? $_POST['woocommerce_gc_ob_wc_gateway_enabled'] : 0 ;
-        $methodTitle = (!empty($_POST['woocommerce_gc_ob_wc_gateway_payment_method_title'])) ? $_POST['woocommerce_gc_ob_wc_gateway_payment_method_title'] : '' ;
-        $methodDesc = (!empty($_POST['woocommerce_gc_ob_wc_gateway_description'])) ? $_POST['woocommerce_gc_ob_wc_gateway_description'] : '' ;
-        $testMode = (!empty($_POST['woocommerce_gc_ob_wc_gateway_test_mode'])) ? $_POST['woocommerce_gc_ob_wc_gateway_test_mode'] : 0 ;
-        $sandboxToken = (!empty($_POST['woocommerce_gc_ob_wc_gateway_sandbox_access_token'])) ? $_POST['woocommerce_gc_ob_wc_gateway_sandbox_access_token'] : '' ;
-        $liveToken = (!empty($_POST['woocommerce_gc_ob_wc_gateway_live_access_token'])) ? $_POST['woocommerce_gc_ob_wc_gateway_live_access_token'] : '' ;
-        
-    }
-
-
-    /**
      *  CREATE ORDER
      */
 
@@ -150,9 +134,9 @@ class gateway_woocom extends WC_Payment_Gateway {
 
         // Verify payment
         if (!$this->verifyPayment()) {
-            $order->update_status('failed', __( 'GC Payment was declined by the customers bank' , 'woocommerce' ));
-            wc_add_notice( __('GoCardless payment error: payment was declined by your bank', 'woothemes'), 'error' );
-            return;
+            // $order->update_status('failed', __( 'GC Payment was declined by the customers bank' , 'woocommerce' ));
+            // wc_add_notice( __('GoCardless payment error: payment was declined by your bank', 'woothemes'), 'error' );
+            // return;
         }
 
         // Payment success

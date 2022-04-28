@@ -124,6 +124,10 @@ class gc_ob_wc_gateway {
     }
 
 
+    /**
+     *  INITIATE CLASSES FOR AJAX BILLING REQUEST
+     */
+
     public function initBillingRequestController() {
         $this->instantiateGateway();
         $this->gatewayGocardless->initBillingRequest();

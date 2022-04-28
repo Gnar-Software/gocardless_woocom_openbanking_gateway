@@ -21,6 +21,8 @@
     });
 
 
+    // INIT GO CARDLESS FLOW
+
     function initGCFlow() {
         
         // REMOVE ERROR FROM FORM IF PRESENT
@@ -41,6 +43,7 @@
         formdata.append('billing_email', billingEmail);
         ajaxTriggerBillingRequest(formdata);
     }
+
 
     // AJAX TRIGGER BILLING REQUEST
 
@@ -140,8 +143,6 @@
 
         $(checkoutForm).submit();
     }
-
-
 
 
     // BILLING REQUEST SETUP ERROR
