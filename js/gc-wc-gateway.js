@@ -9,6 +9,7 @@
             var payment_method = jQuery( 'form.checkout input[name="payment_method"]:checked' ).val();
 
             if (payment_method == 'gc_ob_wc_gateway' && !gatewayFlowAlreadyStarted) {
+                
                 gatewayFlowAlreadyStarted = true;
                 initGCFlow();
                 return false;
@@ -24,7 +25,7 @@
     // INIT GO CARDLESS FLOW
 
     function initGCFlow() {
-        
+
         // REMOVE ERROR FROM FORM IF PRESENT
         var errorField = $('input[name="gc_ob_error"]');
 
@@ -71,10 +72,16 @@
     function triggerGCModal(response) {
         console.log('success: ' + response);
         var responseObj = JSON.parse(response);
+        console.log(responseObj);
 
         // BAIL IF ERRORS
         if (responseObj.status == 'error') {
             console.log('error: ' + responseObj.error);
+            return;
+        }
+        if(responseObj.validation_error) {
+            console.log('validation error: ' + responseObj.validation_error);
+            displayWoocomErrors(responseObj.validation_error);
             return;
         }
 
@@ -149,6 +156,22 @@
 
     function billingRequestSetupError(response) {
         console.log('ajax error: ' + response);
+
+    }
+
+
+    // DISPLAY WOOCOM VALIDATION ERRORS
+
+    function displayWoocomErrors(errors) {
+        
+        $('form.checkout').prepend('<ul class="woocommerce-error"></ul>');
+
+        var parent = $('form.checkout ul.woocommerce-error');
+
+        errors.forEach(function(error) {
+            parent.append('<li>' + error + '</li>');
+            console.log(error);
+        });
 
     }
 

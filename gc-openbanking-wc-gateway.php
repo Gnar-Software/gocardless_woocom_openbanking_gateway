@@ -129,8 +129,22 @@ class gc_ob_wc_gateway {
      */
 
     public function initBillingRequestController() {
+
+        // checkout post validation hook
+        $errorMessages = apply_filters( 'checkout_submitted_pre_gc_flow', $errorMessages = [] );
+
+        if (!empty($errorMessages)) {
+            $errorResponse = [
+                'validation_error' => $errorMessages
+            ];
+
+            die(json_encode($errorResponse));
+        }
+
+        // init billing request
         $this->instantiateGateway();
         $this->gatewayGocardless->initBillingRequest();
+
     }
 }
 

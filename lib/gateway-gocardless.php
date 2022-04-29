@@ -41,6 +41,7 @@ class gateway_gocardless {
         global $woocommerce;
         $response = [];
 
+
         // prepare order details
         $this->paymentAmount = $woocommerce->cart->total * 100;
         $this->paymentCurrency = get_woocommerce_currency();
@@ -188,6 +189,7 @@ class gateway_gocardless {
 
         return $response;
     }
+
 
     /**
      *  CREATE PAYMENT DESCRIPTION
