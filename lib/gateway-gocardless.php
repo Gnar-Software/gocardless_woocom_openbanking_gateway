@@ -209,7 +209,9 @@ class gateway_gocardless {
 
 
     /**
-     *  VERIFY PAYMENT
+     *  VERIFY PAYMENT STATUS
+     *  @param string payment id
+     *  @return string payment status
      */
 
     public function verifyPayment($paymentID) {
@@ -220,16 +222,14 @@ class gateway_gocardless {
         $response = $this->getAPIRequest($getURL);
 
         error_log(json_encode($response), 0);
-
-        if ($response->payments->status == 'confirmed') {
-            return true;
-        }
-        elseif ($response->payments->status == 'failed') {
-            return false;
-        }
         
-        // return true for pending_submission
-        return true;
+        $status = '';
+
+        if (isset($response->payments->status)){
+            $status = $response->payments->status;
+        }
+
+        return $status;
 
     }
 

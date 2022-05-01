@@ -10,6 +10,7 @@ class gateway_woocom extends WC_Payment_Gateway {
     public string $customerID;
     public string $paymentRef;
     public string $paymentID;
+    public string $paymentStatus;
 
 
     public function __construct() {
@@ -132,16 +133,30 @@ class gateway_woocom extends WC_Payment_Gateway {
         $this->paymentRef = $_POST['gc_ob_payment_ref'];
         $this->paymentID  = $_POST['gc_ob_payment_id'];
 
-        // Verify payment
-        if (!$this->verifyPayment()) {
-            // $order->update_status('failed', __( 'GC Payment was declined by the customers bank' , 'woocommerce' ));
-            // wc_add_notice( __('GoCardless payment error: payment was declined by your bank', 'woothemes'), 'error' );
-            // return;
+        // get payment status
+        $this->paymentStatus = $this->verifyPayment();
+
+        // Bail if payment status is failed
+        if ($this->paymentStatus == 'failed') {
+            $order->update_status('failed', __( 'GC Payment was declined by the customers bank' , 'woocommerce' ));
+            wc_add_notice( __('GoCardless payment error: payment was declined by your bank', 'woothemes'), 'error' );
+            return;
         }
 
-        // Payment success
-        $orderNote = 'Go Cardless Payment Succesful: CustomerID - ' . $this->customerID . ' PaymentRef - ' . $this->paymentRef . ' PaymentID - ' . $this->paymentID;
-        $order->update_status('processing', __( $orderNote , 'woocommerce' ));
+        // set order status if it's confirmed
+        if ($this->paymentStatus == 'confirmed') {
+            $orderNote = 'Go Cardless Payment Succesful: CustomerID - ' . $this->customerID . ' PaymentRef - ' . $this->paymentRef . ' PaymentID - ' . $this->paymentID;
+            $order->update_status('processing', __( $orderNote , 'woocommerce' ));
+        }
+        else {
+            // else .. Customer bank authorised / awaiting payment
+            $orderNote = 'Go Cardless Instant bank payment authorised (awaiting payment): CustomerID - ' . $this->customerID . ' PaymentRef - ' . $this->paymentRef . ' PaymentID - ' . $this->paymentID;
+            $order->update_status('pending_payment', __( $orderNote , 'woocommerce' ));
+        }
+
+
+        // Customer bank authorised / awaiting payment
+        $orderNote = 'Go Cardless Instant bank payment authorised (awaiting payment): CustomerID - ' . $this->customerID . ' PaymentRef - ' . $this->paymentRef . ' PaymentID - ' . $this->paymentID;
 
         // Empty cart
         $woocommerce->cart->empty_cart();
@@ -185,9 +200,10 @@ class gateway_woocom extends WC_Payment_Gateway {
             );
         }
 
-        // verify payment
+        $paymentStatus = $gatewayGocardless->verifyPayment($this->paymentID);
 
-        return $gatewayGocardless->verifyPayment($this->paymentID);
+        return $paymentStatus;
+
 
     }
 

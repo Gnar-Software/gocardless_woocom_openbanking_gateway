@@ -22,6 +22,9 @@ define( 'GC_BILLING_REQUEST_FLOW_ENDPOINT', 'billing_request_flows' );
 define( 'GC_PAYMENTS_ENDPOINT',             'payments' );
 define( 'GC_API_VERSION',                   '2015-07-06' );
 define( 'WC_ORDER_RECIEVED_URL',            '/order-recieved' );
+define( 'WEBHOOK_NAMESPACE',                'gateway_gc_wc/v1' );
+define( 'WEBHOOK_ROUTE_PAYMENT_STATUS',     'instant_bank_payment_status' );
+define( 'secret_temp',                      '7hMt_c3NJG-_AEl-Wi_5jP8An4m_9eacztGbMJYE' );
 
 
 
@@ -66,6 +69,7 @@ class gc_ob_wc_gateway {
     public function instantiateGateway() {
         include_once( LIB_DIR . '/gateway-woocom.php' );
         include_once( LIB_DIR . '/gateway-gocardless.php' );
+        include_once( LIB_DIR . '/gateway-webhook.php' );
 
         $this->gatewayWoocom = new gateway_woocom();
 
@@ -91,6 +95,9 @@ class gc_ob_wc_gateway {
                     $this->gatewayWoocom->reuseCustomers
                 );
             }
+
+            // init webhook
+            new gateway_webhook($this->gatewayWoocom, $this->gatewayGocardless);
 
         }
 
