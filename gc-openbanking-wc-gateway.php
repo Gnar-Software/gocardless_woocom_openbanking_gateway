@@ -97,7 +97,7 @@ class gc_ob_wc_gateway {
             }
 
             // init webhook
-            new gateway_webhook($this->gatewayWoocom, $this->gatewayGocardless);
+            //new gateway_webhook($this->gatewayWoocom, $this->gatewayGocardless);
 
         }
 
@@ -137,8 +137,10 @@ class gc_ob_wc_gateway {
 
     public function initBillingRequestController() {
 
-        // checkout post validation hook
-        $errorMessages = apply_filters( 'checkout_submitted_pre_gc_flow', $errorMessages = [] );
+        // checkout fields validation hook
+        wc_clear_notices();
+
+        $errorMessages = apply_filters( 'checkout_submitted_pre_gc_flow', $errorMessages = [], $checkoutFields = $_POST['checkout_fields'] );
 
         if (!empty($errorMessages)) {
             $errorResponse = [

@@ -16,4 +16,5 @@ GoCardless open banking payment gateway for Woocommerce. Uses GC's open banking 
 
 // checkout post validation hook
 - filter -> checkout_submitted_pre_gc_flow
-    - arguments = $errorMessages (array)  // add error message to array to prevent start of GC flow
+    - arguments =   $errorMessages (array)  // add error message to array to prevent start of GC flow
+                    $checkoutFields (array) // unsanitized checkout fields

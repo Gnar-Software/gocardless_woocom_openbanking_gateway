@@ -11,6 +11,7 @@
             if (payment_method == 'gc_ob_wc_gateway' && !gatewayFlowAlreadyStarted) {
                 
                 gatewayFlowAlreadyStarted = true;
+                console.log('gateway place order init');
                 initGCFlow();
                 return false;
             }
@@ -42,6 +43,12 @@
         var formdata = new FormData();
         formdata.append('action', 'initBillingRequest');
         formdata.append('billing_email', billingEmail);
+
+        var checkoutFields = getFormData($( 'form.checkout' ));
+        for ( var key in checkoutFields ) {
+            formdata.append(key, checkoutFields[key]);
+        }
+        
         ajaxTriggerBillingRequest(formdata);
     }
 
@@ -77,11 +84,14 @@
         // BAIL IF ERRORS
         if (responseObj.status == 'error') {
             console.log('error: ' + responseObj.error);
+            gatewayFlowAlreadyStarted = false;
             return;
         }
-        if(responseObj.validation_error) {
+
+        if (responseObj.validation_error) {
             console.log('validation error: ' + responseObj.validation_error);
             displayWoocomErrors(responseObj.validation_error);
+            gatewayFlowAlreadyStarted = false;
             return;
         }
 
@@ -90,6 +100,7 @@
 
         if (!responseObj.BR_Flow_ID || !responseObj.mode) {
             console.log('error: server response object does not contain flow ID or mode');
+            gatewayFlowAlreadyStarted = false;
             return;
         }
 
@@ -164,7 +175,11 @@
 
     function displayWoocomErrors(errors) {
         
-        $('form.checkout').prepend('<ul class="woocommerce-error"></ul>');
+        var errorUL = $( '.checkout ul.woocommerce-error' );
+
+        if (errorUL.length == 0) {
+            $( 'form.checkout').prepend('<ul class="woocommerce-error"></ul>');
+        }
 
         var parent = $('form.checkout ul.woocommerce-error');
 
@@ -173,6 +188,20 @@
             console.log(error);
         });
 
+    }
+
+
+    // GET FORM DATA
+
+    function getFormData($form){
+        var unindexed_array = $form.serializeArray();
+        var indexed_array = {};
+    
+        $.map(unindexed_array, function(n, i){
+            indexed_array[n['name']] = n['value'];
+        });
+    
+        return indexed_array;
     }
 
 
