@@ -216,8 +216,6 @@ class gateway_gocardless {
 
     public function verifyPayment($paymentID) {
 
-        $paymentID = 'PM005528J5VQDM';
-
         $getURL = $this->apiBaseURL . GC_PAYMENTS_ENDPOINT . '/' . $paymentID;
         $response = $this->getAPIRequest($getURL);
 

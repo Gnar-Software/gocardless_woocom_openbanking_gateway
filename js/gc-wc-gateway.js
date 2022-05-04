@@ -36,13 +36,13 @@
 
         // GET ENTERED BILLING EMAIL
         var billingEmail = $('input[name="billing_email"]');
-        console.log(billingEmail);
         
 
         // TRIGGER SERVER BILLING REQUEST
         var formdata = new FormData();
         formdata.append('action', 'initBillingRequest');
         formdata.append('billing_email', billingEmail);
+        formdata.append('security', gcGateway.security)
 
         var checkoutFields = getFormData($( 'form.checkout' ));
         for ( var key in checkoutFields ) {
@@ -125,16 +125,10 @@
     // PAYMENT FLOW COMPLETE
 
     function paymentFlowComplete(billingRequest, billingRequestFlow) {
-        console.log('we had a success!');
-        console.log('BR: ' + JSON.stringify(billingRequest));
-        console.log('BRF: ' + JSON.stringify(billingRequestFlow));
         
         var customerID = billingRequest.resources.customer.id;
         var paymentRef = billingRequest.links.payment_request;
         var paymentID  = billingRequest.links.payment_request_payment;
-
-        console.log(customerID);
-        console.log(paymentRef);
 
         var checkoutForm = $('form.checkout');
 
@@ -142,7 +136,6 @@
         $(checkoutForm).append('<input type="hidden" name="gc_ob_payment_ref" value="' + paymentRef + '">');
         $(checkoutForm).append('<input type="hidden" name="gc_ob_payment_id" value="' + paymentID + '">');
         
-
         $('form.checkout').submit();
     }
 
@@ -150,7 +143,7 @@
     // PAYMENT WINDOW CLOSED OR ERROR
 
     function paymentFlowError(error, metadata) {
-        console.log('we had a fail!');
+        console.log('we had a issue!');
         console.log('error: ' + JSON.stringify(error));
         console.log('metadata: ' + JSON.stringify(metadata));
 
@@ -167,7 +160,6 @@
 
     function billingRequestSetupError(response) {
         console.log('ajax error: ' + response);
-
     }
 
 

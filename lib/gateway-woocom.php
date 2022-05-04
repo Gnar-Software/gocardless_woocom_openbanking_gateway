@@ -50,6 +50,8 @@ class gateway_woocom extends WC_Payment_Gateway {
 
     public function init_form_fields() {
 
+        $webhookURL = get_home_url() . '/wp-json/' . WEBHOOK_NAMESPACE . '/' . WEBHOOK_ROUTE_PAYMENTS;
+
         // ENABLE, TITLE, DESCRIPTION, TEST MODE, ACCESS TOKEN
 
         $this->form_fields = array(
@@ -60,17 +62,19 @@ class gateway_woocom extends WC_Payment_Gateway {
                 'default' => 'yes'
             ),
             'payment_method_title' => array(
-                'title'   => 'Payment Method Title',
+                'title'   => 'Payment Method Title *',
                 'type'    => 'text',
-                'default' => 'Instant bank payment'
+                'default' => 'Instant bank payment',
+                'required'=> true
             ),
             'description' => array(
-                'title'   => 'Payment Method Description',
+                'title'   => 'Payment Method Description *',
                 'type'    => 'text',
-                'default' => 'Pay with an instant bank payment, and setup a direct debit where required'
+                'default' => 'Pay with an instant bank payment, and setup a direct debit where required',
+                'required'=> true
             ),
             'test_mode' => array(
-                'title'   => 'Enable Test Mode',
+                'title'   => 'Enable Sandbox Mode',
                 'type'    => 'checkbox',
                 'label'   => 'Turn on test mode',
                 'default' => 'no'
@@ -80,8 +84,15 @@ class gateway_woocom extends WC_Payment_Gateway {
                 'type'    => 'text'
             ),
             'live_access_token' => array(
-                'title'   => 'Live access token',
-                'type'    => 'text'
+                'title'   => 'Live access token *',
+                'type'    => 'text',
+                'required'=> true
+            ),
+            'webhook_secret' => array(
+                'title'   => 'Webhook secret *',
+                'type'    => 'text',
+                'required'=> true,
+                'description' => 'Generate your webhook secret in the GoCardless Dashboard: <br/><br/> - Give your webhook a meaningfull name such as your website address <br/> - Use this URL: "' . $webhookURL . '".<br/> - Paste the secret generated above.'
             ),
             'reuse_customers' => array(
                 'title'   => 'Re-use customer records in GoCardless',
@@ -100,6 +111,7 @@ class gateway_woocom extends WC_Payment_Gateway {
 
     public function process_payment($order_id) {
         global $woocommerce;
+        $logger = wc_get_logger();
 
         $order = new WC_Order( $order_id );
 
@@ -124,6 +136,7 @@ class gateway_woocom extends WC_Payment_Gateway {
                 $order->update_status('pending', __( 'Error recieving payment reference from GC' , 'woocommerce' ));
             }
 
+            $logger->error('Error recieving customer ID | payment ref | payment ID from GC', array( 'source' => 'GoCardless Gateway' ));
             wc_add_notice( __('GoCardless payment error: error recieving payment reference from GC', 'woothemes'), 'error' );
             return;
         }
@@ -133,12 +146,18 @@ class gateway_woocom extends WC_Payment_Gateway {
         $this->paymentRef = $_POST['gc_ob_payment_ref'];
         $this->paymentID  = $_POST['gc_ob_payment_id'];
 
+        $order->update_meta_data('gc_ob_customer_id', $this->customerID);
+        $order->update_meta_data('gc_ob_payment_ref', $this->paymentRef);
+        $order->update_meta_data('gc_ob_payment_id', $this->paymentID);
+
+
         // get payment status
         $this->paymentStatus = $this->verifyPayment();
 
         // Bail if payment status is failed
         if ($this->paymentStatus == 'failed') {
-            $order->update_status('failed', __( 'GC Payment was declined by the customers bank' , 'woocommerce' ));
+            $order->update_status('failed', 'GC Payment was declined by the customers bank');
+            $logger->info('GC payment was declined during checkout flow -> order: ' . $order_id, array( 'source' => 'GoCardless Gateway' ));
             wc_add_notice( __('GoCardless payment error: payment was declined by your bank', 'woothemes'), 'error' );
             return;
         }
@@ -146,17 +165,15 @@ class gateway_woocom extends WC_Payment_Gateway {
         // set order status if it's confirmed
         if ($this->paymentStatus == 'confirmed') {
             $orderNote = 'Go Cardless Payment Succesful: CustomerID - ' . $this->customerID . ' PaymentRef - ' . $this->paymentRef . ' PaymentID - ' . $this->paymentID;
-            $order->update_status('processing', __( $orderNote , 'woocommerce' ));
+            $logger->info('GC payment was confirmed during checkout flow -> order: ' . $order_id, array( 'source' => 'GoCardless Gateway' ));
+            $order->update_status('processing', $orderNote);
         }
         else {
             // else .. Customer bank authorised / awaiting payment
             $orderNote = 'Go Cardless Instant bank payment authorised (awaiting payment): CustomerID - ' . $this->customerID . ' PaymentRef - ' . $this->paymentRef . ' PaymentID - ' . $this->paymentID;
-            $order->update_status('pending_payment', __( $orderNote , 'woocommerce' ));
+            $logger->info('GC payment was successful but payment is still pending at checkout completion -> order: ' . $order_id, array( 'source' => 'GoCardless Gateway' ));
+            $order->update_status('pending_payment', $orderNote);
         }
-
-
-        // Customer bank authorised / awaiting payment
-        $orderNote = 'Go Cardless Instant bank payment authorised (awaiting payment): CustomerID - ' . $this->customerID . ' PaymentRef - ' . $this->paymentRef . ' PaymentID - ' . $this->paymentID;
 
         // Empty cart
         $woocommerce->cart->empty_cart();

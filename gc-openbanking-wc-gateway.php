@@ -23,8 +23,7 @@ define( 'GC_PAYMENTS_ENDPOINT',             'payments' );
 define( 'GC_API_VERSION',                   '2015-07-06' );
 define( 'WC_ORDER_RECIEVED_URL',            '/order-recieved' );
 define( 'WEBHOOK_NAMESPACE',                'gateway_gc_wc/v1' );
-define( 'WEBHOOK_ROUTE_PAYMENT_STATUS',     'instant_bank_payment_status' );
-define( 'secret_temp',                      '7hMt_c3NJG-_AEl-Wi_5jP8An4m_9eacztGbMJYE' );
+define( 'WEBHOOK_ROUTE_PAYMENTS',           'payments' );
 
 
 
@@ -97,7 +96,7 @@ class gc_ob_wc_gateway {
             }
 
             // init webhook
-            //new gateway_webhook($this->gatewayWoocom, $this->gatewayGocardless);
+            new gateway_webhook($this->gatewayWoocom, $this->gatewayGocardless);
 
         }
 
@@ -124,7 +123,8 @@ class gc_ob_wc_gateway {
         $gcGatewayVars = [
             'ajax_url' => admin_url('admin-ajax.php'),
             'basket_url'=> wc_get_cart_url(),
-            'checkout_url' => wc_get_checkout_url()
+            'checkout_url' => wc_get_checkout_url(),
+            'security'  => wp_create_nonce( 'gc_ob_security_nonce' )
         ];
 
         wp_localize_script( 'gc-wc-gateway', 'gcGateway', $gcGatewayVars );
@@ -136,6 +136,13 @@ class gc_ob_wc_gateway {
      */
 
     public function initBillingRequestController() {
+
+        // authorize
+        if (!check_ajax_referer( 'gc_ob_security_nonce', 'security', false )) {
+            $logger = wc_get_logger();
+            $logger->warning('Unnauthorised ajax request', array( 'source' => 'GoCardless Gateway' ));
+            wp_die();
+        }
 
         // checkout fields validation hook
         wc_clear_notices();
