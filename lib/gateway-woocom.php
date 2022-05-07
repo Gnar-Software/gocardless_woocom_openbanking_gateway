@@ -117,14 +117,32 @@ class gateway_woocom extends WC_Payment_Gateway {
 
         // Payment errors
         if (isset($_POST['gc_ob_error'])) {
+
             if ($order->has_status('pending')) {
                 $order->add_order_note('GC Payment flow was not completed');
             }
             else {
-                $order->update_status('pending', __( 'GC Payment flow was not completed' , 'woocommerce' ));
+                $order->update_status('pending', 'GC Payment flow was not completed');
             }
 
+            $logger->info('GC: payment flow was not completed', array( 'source' => 'GoCardless Gateway' ));
             wc_add_notice( __('GoCardless payment error: did not complete payment flow', 'woothemes'), 'error' );
+            return;
+        }
+
+        if (isset($_POST['gc_ob_br_error'])) {
+
+            $error = sanitize_text_field($_POST['gc_ob_error']);
+
+            if ($order->has_status('pending')) {
+                $order->add_order_note('GC Payment flow -> Payment flow was completed but there was an error');
+            }
+            else {
+                $order->update_status('pending', 'GC Payment flow -> Payment flow was completed but there was an error');
+            }
+
+            $logger->error('GC error: Payment flow was completed but there was an error ' . $error, array( 'source' => 'GoCardless Gateway' ));
+            wc_add_notice( __('GoCardless payment error: sorry something went wrong', 'woothemes'), 'error' );
             return;
         }
 
@@ -224,9 +242,6 @@ class gateway_woocom extends WC_Payment_Gateway {
 
     }
 
-
-
 }
-
 
 ?>

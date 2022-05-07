@@ -132,9 +132,14 @@
 
         var checkoutForm = $('form.checkout');
 
-        $(checkoutForm).append('<input type="hidden" name="gc_ob_customer_id" value="' + customerID + '">');
-        $(checkoutForm).append('<input type="hidden" name="gc_ob_payment_ref" value="' + paymentRef + '">');
-        $(checkoutForm).append('<input type="hidden" name="gc_ob_payment_id" value="' + paymentID + '">');
+        if (customerID && paymentRef && paymentID) {
+            $(checkoutForm).append('<input type="hidden" name="gc_ob_customer_id" value="' + customerID + '">');
+            $(checkoutForm).append('<input type="hidden" name="gc_ob_payment_ref" value="' + paymentRef + '">');
+            $(checkoutForm).append('<input type="hidden" name="gc_ob_payment_id" value="' + paymentID + '">');
+        }
+        else {
+            $(checkoutForm).append('<input type="hidden" name="gc_ob_br_error" value="' + billingRequest + '">');
+        }
         
         $('form.checkout').submit();
     }

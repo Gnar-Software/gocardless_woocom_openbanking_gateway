@@ -61,13 +61,13 @@ class gateway_webhook {
                 }
             }
             catch (Exception $e) {
+                $logger->error($e->getMessage(), array( 'source' => 'GoCardless Gateway' ));
                 error_log($e->getMessage());
             }
         }
 
         
         // return succesful response
-        die(var_dump($this->responseData));
         $this->response->set_data($this->responseData);
         $this->response->set_status( 204 );
         http_response_code(204); 
@@ -108,11 +108,17 @@ class gateway_webhook {
         $orderNote = '';
         $responseKey = 'event_' . $event->id;
 
-        // determine status
+        // validate request
+        if (empty($event->links->payment)) {
+            $logger->error('Webhook payment event, paymentID was not in request event: webhookID = ' . $event->id, array( 'source' => 'GoCardless Gateway' ));
+            return;
+        }
+
         if (empty($event->action)) {
             return;
         }
 
+        // determine status
         switch ($event->action) {
             case 'confirmed' :
                 $orderStatus = 'processing';
@@ -133,7 +139,11 @@ class gateway_webhook {
 
         // get order with this payment id and update
         $orders = wc_get_orders([
-            'gc_ob_payment_id' => $event->links->payment
+            'limit'        => -1,
+            'orderby'      => 'date',
+            'order'        => 'DESC',
+            'meta_key'     => 'gc_ob_payment_id',
+            'meta_value'   => $event->links->payment
         ]);
 
 
@@ -141,14 +151,19 @@ class gateway_webhook {
             $order = $orders[0];
 
             // update order status accordingly / add order note
-            if ($order->has_status($orderStatus)) {
-                $order->add_order_note($orderNote);
+            if (!empty($orderStatus) ) {
+                if ($order->has_status($orderStatus)) {
+                    $order->add_order_note($orderNote);
+                }
+                else {
+                    $order->update_status($orderStatus, $orderNote);
+                }
+
+                $logger->info('Webhook payment event, order: ' . $order->id . ' status updated to: ' . $orderStatus . ' paymentID = ' . $event->links->payment . ' webhookID = ' . $event->id, array( 'source' => 'GoCardless Gateway' ));
             }
             else {
-                $order->update_status($orderStatus, $orderNote);
+                $logger->info('Webhook payment event, order: ' . $order->id . ' payment status is updated but order status stays the same. PaymentID = ' . $paymentID .  $event->links->payment . ' webhookID = ' . $event->id, array( 'source' => 'GoCardless Gateway' ));
             }
-
-            $logger->info('Webhook payment event, order: ' . $order->id . ' status updated to: ' . $orderStatus, array( 'source' => 'GoCardless Gateway' ));
         }
         else {
             $logger->error('Webhook payment event recieved, but no order exists with Payment ID: ' . $event->links->payment, array( 'source' => 'GoCardless Gateway' ));
