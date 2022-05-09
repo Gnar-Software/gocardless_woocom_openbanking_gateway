@@ -1,11 +1,11 @@
 <?php
 
 /*
- * Plugin Name: GoCardless Open Banking WC payment gateway
- * Description: A woocoommerce payment gateway integration with GoCardless open banking API
+ * Plugin Name: Woocommerce GoCardless Instant Bank Payments
+ * Description: A payment gateway for Woocommerce and GoCardless. Take instant bank payments using open banking technology.
  * Version: 1.0.0
- * Author: evince | Adam Kent & Dan Vince
- * Author URI: https://www.evince.uk
+ * Author: gnar software
+ * Author URI: https://www.gnar.co.uk/
  * License: GPLv2 or later
  * Text Domain: gc-openbanking-wc-gateway
 */
