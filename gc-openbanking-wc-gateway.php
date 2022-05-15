@@ -10,6 +10,9 @@
  * Text Domain: gc-openbanking-wc-gateway
 */
 
+if ( ! defined( 'ABSPATH' ) ) {
+    exit;
+}
 
 define( 'PLUGIN_DIR',                       plugin_dir_path( __FILE__ ) );
 define( 'LIB_DIR',                          plugin_dir_path( __FILE__ ) . '/lib' );

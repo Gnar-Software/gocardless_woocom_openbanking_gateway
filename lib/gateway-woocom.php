@@ -1,5 +1,9 @@
 <?php
 
+if ( ! defined( 'ABSPATH' ) ) {
+    exit;
+}
+
 class gateway_woocom extends WC_Payment_Gateway {
 
     public bool $testMode;
