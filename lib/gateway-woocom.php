@@ -4,7 +4,6 @@ class gateway_woocom extends WC_Payment_Gateway {
 
     public bool $testMode;
     public bool $active = false;
-    public bool $reuseCustomers;
     public string $sandboxToken;
     public string $liveToken;
     public string $customerID;
@@ -31,10 +30,17 @@ class gateway_woocom extends WC_Payment_Gateway {
             add_action( 'woocommerce_update_options_payment_gateways_' . $this->id, [$this, 'process_admin_options'] );
         }
 
-        $this->testMode = (bool) $this->get_option('test_mode');
+        if ($this->get_option('test_mode') == 'yes') {
+            $this->testMode = true;
+        }
+        else {
+            $this->testMode = false;
+        }
+
         $this->sandboxToken = $this->get_option('sandbox_access_token');
         $this->liveToken = $this->get_option('live_access_token');
-        $this->reuseCustomers = $this->get_option('reuse_customers');
+        $this->title = $this->get_option('payment_method_title');
+        $this->description = $this->get_option('description');
         
 
         // enable
@@ -93,12 +99,6 @@ class gateway_woocom extends WC_Payment_Gateway {
                 'type'    => 'text',
                 'required'=> true,
                 'description' => 'Generate your webhook secret in the GoCardless Dashboard: <br/><br/> - Give your webhook a meaningfull name such as your website address <br/> - Use this URL: "' . $webhookURL . '".<br/> - Paste the secret generated above.'
-            ),
-            'reuse_customers' => array(
-                'title'   => 'Re-use customer records in GoCardless',
-                'type'    => 'checkbox',
-                'label'   => 'Re-uses a customer record in GoCardless based on their email (creates new record every time if disabled)',
-                'default' => 'yes'
             )
         );
 
@@ -222,8 +222,7 @@ class gateway_woocom extends WC_Payment_Gateway {
             $gatewayGocardless = new gateway_gocardless(
                 $this->sandboxToken,
                 GC_SANDBOX_API_BASE,
-                $this->testMode,
-                $this->reuseCustomers
+                $this->testMode
             );
         }
         else {

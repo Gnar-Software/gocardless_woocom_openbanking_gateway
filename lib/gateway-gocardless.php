@@ -12,11 +12,10 @@ class gateway_gocardless {
     public $paymentAmount;
     public $paymentDescription;
     public $mode;
-    public $reuseCustomer;
     public $gcCustomerID;
 
 
-    public function __construct($accesstoken, $apiBaseUrl, $testmode, $reusecustomer) {
+    public function __construct($accesstoken, $apiBaseUrl, $testmode) {
 
         $this->accessToken = $accesstoken;
         $this->apiBaseURL = $apiBaseUrl;
@@ -27,8 +26,6 @@ class gateway_gocardless {
         else {
             $this->mode = 'sandbox';
         }
-
-        $this->reuseCustomer = $reusecustomer;
 
     }
 
@@ -54,12 +51,12 @@ class gateway_gocardless {
 
         
         // customer
-        if ($this->reuseCustomer) {
-            $customerEmail = $this->getCustomerEmail();
-            if (!empty($customerEmail)) {
-                $this->gcCustomerID = $this->retrieveCustomer($customerEmail);
-            }
-        }
+        // if ($this->reuseCustomer) {
+        //     $customerEmail = $this->getCustomerEmail();
+        //     if (!empty($customerEmail)) {
+        //         $this->gcCustomerID = $this->retrieveCustomer($customerEmail);
+        //     }
+        // }
 
 
         // billing request
