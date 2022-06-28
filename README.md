@@ -6,6 +6,11 @@ Requires: PHP 7.4, Wordpress 5.8
 
 Tested: PHP 7.4, Wordpress 6.0
 
+# SCHEDULED
+
+- Woocommerce subscription support
+- Refund support 
+
 
 # ACTIONS / FILTERS / HOOKS
 
