@@ -80,7 +80,7 @@ class gateway_woocom extends WC_Payment_Gateway {
             'description' => array(
                 'title'   => 'Payment Method Description *',
                 'type'    => 'text',
-                'default' => 'Pay with an instant bank payment, and setup a direct debit where required',
+                'default' => 'Pay with an instant bank payment',
                 'required'=> true
             ),
             'test_mode' => array(
