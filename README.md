@@ -3,6 +3,7 @@
 GoCardless open banking payment gateway for Woocommerce. Uses GC's open banking billing request flow and JS dropin.
 
 Requires: PHP 7.4, Wordpress 5.8
+
 Tested: PHP 7.4, Wordpress 6.0
 
 
