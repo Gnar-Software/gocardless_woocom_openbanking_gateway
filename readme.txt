@@ -32,6 +32,10 @@ Customers complete the transaction without leaving your checkout page.
 * Optimise payer conversion: Frictionless authorisation and no need to enter card details.
 * Save admin time: Spend less time chasing down late or failed payments.
 
+= What currencies can I sell in =
+
+Currently, Instant Bank Pay is only available in GBP and EURO.
+
 = What countries can I sell to? =
 
 Currently, Instant Bank Pay is available for your customers based in the UK, and Germany. As a merchant, you can access the feature if you're based in the UK, US, EEA, and Australia.

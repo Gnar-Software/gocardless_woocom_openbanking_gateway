@@ -83,7 +83,15 @@
 
         // BAIL IF ERRORS
         if (responseObj.status == 'error') {
-            console.log('error: ' + responseObj.error);
+            console.log('error: ' + JSON.stringify(responseObj.error));
+
+            var modalLaunchErrors = [];
+            var modalLaunchErrorObjs = responseObj.error.errors;
+            modalLaunchErrorObjs.forEach(function(errorObj) {
+                modalLaunchErrors.push(errorObj.field + ': ' + errorObj.message);
+            });
+
+            displayWoocomErrors(modalLaunchErrors);
             gatewayFlowAlreadyStarted = false;
             return;
         }
