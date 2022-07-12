@@ -60,7 +60,7 @@ class gateway_woocom extends WC_Payment_Gateway {
 
     public function init_form_fields() {
 
-        $webhookURL = get_home_url() . '/wp-json/' . WEBHOOK_NAMESPACE . '/' . WEBHOOK_ROUTE_PAYMENTS;
+        $webhookURL = get_home_url() . '/wp-json/' . GC_WEBHOOK_NAMESPACE . '/' . GC_WEBHOOK_ROUTE_PAYMENTS;
 
         // ENABLE, TITLE, DESCRIPTION, TEST MODE, ACCESS TOKEN
 

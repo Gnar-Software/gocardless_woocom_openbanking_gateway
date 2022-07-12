@@ -35,8 +35,8 @@ class gateway_webhook {
     public function registerEndpoints() {
 
         register_rest_route(
-            WEBHOOK_NAMESPACE,
-            WEBHOOK_ROUTE_PAYMENTS,
+            GC_WEBHOOK_NAMESPACE,
+            GC_WEBHOOK_ROUTE_PAYMENTS,
             [
                 'methods' => ['GET', 'POST'],
                 'callback' => [$this, 'webhookController'],

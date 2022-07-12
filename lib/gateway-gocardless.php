@@ -179,7 +179,7 @@ class gateway_gocardless {
 
         $params = (object) [
             'billing_request_flows' => (object) [
-                'redirect_uri' => get_site_url() . WC_ORDER_RECIEVED_URL,
+                'redirect_uri' => get_site_url() . GC_WC_ORDER_RECIEVED_URL,
                 'links' => (object) [
                     'billing_request' => $this->billingRequestID
                 ]
