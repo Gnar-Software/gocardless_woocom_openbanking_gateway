@@ -28,8 +28,6 @@ class gateway_webhook {
 
     /**
      *  REGISTER ENDPOINTS
-     *  // https://www.onecallsim.com/wp-json/gateway_gc_wc/v1/payments
-     *  
      */
 
     public function registerEndpoints() {

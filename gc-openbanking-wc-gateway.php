@@ -34,6 +34,7 @@ class gc_ob_wc_gateway {
 
     public object $gatewayWoocom;
     public object $gatewayGocardless;
+    public array  $requiredFields;
 
 
     public function __construct() {
@@ -50,6 +51,9 @@ class gc_ob_wc_gateway {
         // REGISTER AJAX ACTIONS
         add_action( 'wp_ajax_initBillingRequest', [$this, 'initBillingRequestController'] );
         add_action( 'wp_ajax_nopriv_initBillingRequest', [$this, 'initBillingRequestController'] );
+
+        // CHECKOUT FIELD VALIDATION
+        add_filter( 'checkout_submitted_pre_gc_flow', [$this, 'validateCheckoutFields'], 10, 2 );
 
     }
 
@@ -162,6 +166,53 @@ class gc_ob_wc_gateway {
         $this->instantiateGateway();
         $this->gatewayGocardless->initBillingRequest();
 
+    } 
+
+
+    /**
+     *  CHECKOUT FIELD VALIDATION
+     */
+
+    public function validateCheckoutFields($errors, $checkoutFields) {
+
+        $checkoutFieldsObj = json_decode(stripslashes($checkoutFields), true);
+        $fieldErrors = [];
+        
+        add_filter( 'woocommerce_checkout_fields', [$this, 'getRequiredFields'], 10, 1);
+        
+        error_log('required fields: ' . json_encode($this->requiredFields));
+
+        foreach ($this->requiredFields as $requiredField) {
+            array_push($fieldErrors, $requiredField);
+        }
+
+        die(json_encode([
+            'validation_error' => true,
+            'error' => $fieldErrors
+        ]));
+
+    }
+
+
+    public function getRequiredFields($fields) {
+
+        $requiredFields = [];
+
+        foreach ($fields['billing'] as $billingFieldName => $billingField) {
+            if (!empty($billingField['validate'])) {
+                array_push($requiredFields, $billingFieldName);
+            }
+        }
+
+        foreach ($fields['shipping'] as $shippingFieldName => $shippingField) {
+            if (!empty($shippingField['validate'])) {
+                array_push($requiredFields, $shippingFieldName);
+            }
+        }
+
+        $this->requiredFields = $requiredFields;
+
+        return $fields;
     }
 }
 

@@ -45,10 +45,10 @@
         formdata.append('security', gcGateway.security)
 
         var checkoutFields = getFormData($( 'form.checkout' ));
-        for ( var key in checkoutFields ) {
-            formdata.append(key, checkoutFields[key]);
-        }
-        
+
+        formdata.append('checkout_fields', JSON.stringify(checkoutFields));
+
+        console.log('checkout fields: ' + JSON.stringify(checkoutFields));
         ajaxTriggerBillingRequest(formdata);
     }
 
