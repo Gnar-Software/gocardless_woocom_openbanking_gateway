@@ -45,10 +45,11 @@
         formdata.append('security', gcGateway.security)
 
         var checkoutFields = getFormData($( 'form.checkout' ));
-        for ( var key in checkoutFields ) {
-            formdata.append(key, checkoutFields[key]);
-        }
-        
+        formdata.append('checkout_fields', JSON.stringify(checkoutFields));
+
+        var requiredFields = getRequiredCheckoutFields(checkoutFields);
+        formdata.append('required_fields', JSON.stringify(requiredFields));
+
         ajaxTriggerBillingRequest(formdata);
     }
 
@@ -111,6 +112,9 @@
             gatewayFlowAlreadyStarted = false;
             return;
         }
+
+        // NO VALIDATION ISSUES, REMOVE PRE-EXISTING WC ERRORS FROM DOM
+        displayWoocomErrors(null);
 
         // CREATE HANDLER
         const handler = GoCardlessDropin.create({
@@ -188,6 +192,11 @@
 
         var parent = $('form.checkout ul.woocommerce-error');
 
+        if (errors == null) {
+            parent.empty();
+            return;
+        }
+
         errors.forEach(function(error) {
             parent.append('<li>' + error + '</li>');
             console.log(error);
@@ -207,6 +216,24 @@
         });
     
         return indexed_array;
+    }
+
+
+    // GET REQUIRED CHECKOUT FIELDS
+
+    function getRequiredCheckoutFields(fields) {
+
+        var requiredFields = [];
+
+        Object.keys(fields).forEach(function(key) {
+            var parentRow = $('#' + key).closest('p');
+
+            if ($(parentRow).hasClass('validate-required')) {
+                requiredFields.push(key);
+            }
+        });
+
+        return requiredFields;
     }
 
 

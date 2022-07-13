@@ -1,13 +1,13 @@
 <?php
 
 /*
- * Plugin Name: GoCardless Instant Bank Payments
+ * Plugin Name: Instant Bank Payments via GoCardless for WooCommerce
  * Description: A payment gateway for WooCommerce and GoCardless. Take instant bank payments using open banking technology, payments clear almost instantly. Only available for customers in the UK and Germany.
- * Version: 1.0.1
+ * Version: 1.1.0
  * Author: gnar software
  * Author URI: https://www.gnar.co.uk/
  * License: GPLv2 or later
- * Text Domain: gc-openbanking-wc-gateway
+ * Text Domain: wc-gocardless-instant-bank-payments
 */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -50,6 +50,9 @@ class gc_ob_wc_gateway {
         // REGISTER AJAX ACTIONS
         add_action( 'wp_ajax_initBillingRequest', [$this, 'initBillingRequestController'] );
         add_action( 'wp_ajax_nopriv_initBillingRequest', [$this, 'initBillingRequestController'] );
+
+        // CHECKOUT FIELD VALIDATION
+        add_filter( 'checkout_submitted_pre_gc_flow', ['gateway_woocom', 'gcValidateCheckoutFields'], 10, 3 );
 
     }
 
@@ -148,7 +151,7 @@ class gc_ob_wc_gateway {
         // checkout fields validation hook
         wc_clear_notices();
 
-        $errorMessages = apply_filters( 'checkout_submitted_pre_gc_flow', $errorMessages = [], $checkoutFields = $_POST['checkout_fields'] );
+        $errorMessages = apply_filters( 'checkout_submitted_pre_gc_flow', $errorMessages = [], $checkoutFields = $_POST['checkout_fields'], $requiredFields = $_POST['required_fields'] );
 
         if (!empty($errorMessages)) {
             $errorResponse = [
@@ -163,6 +166,8 @@ class gc_ob_wc_gateway {
         $this->gatewayGocardless->initBillingRequest();
 
     }
+
+
 }
 
 new gc_ob_wc_gateway();

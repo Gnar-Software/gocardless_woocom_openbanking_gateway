@@ -1,7 +1,11 @@
 *** Changelog ***
 
-= 1.0.0 - 08-05-2022 =
-* First Release
+= 1.1.0 - 13-07-2022 =
+* Added server side required checkout field validation
+* Changed display name and slug
 
 = 1.0.1 - 11-07-2022 =
 * Added additional Woocommerce errors for incorrectly setup GC accounts
+
+= 1.0.0 - 08-05-2022 =
+* First Release

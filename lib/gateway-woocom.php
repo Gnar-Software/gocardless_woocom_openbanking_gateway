@@ -245,6 +245,36 @@ class gateway_woocom extends WC_Payment_Gateway {
 
     }
 
+
+    /**
+     *  CHECKOUT FIELD VALIDATION
+     */
+
+    public function gcValidateCheckoutFields($errors, $checkoutFields, $requiredFields) {
+
+        $checkoutFields = json_decode(stripslashes($checkoutFields), true);
+        $requiredFields = json_decode(stripslashes($requiredFields));
+
+        foreach ($requiredFields as $requiredField) {
+
+            // don't require shipping fields if shipping to same address
+            if (!isset($checkoutFields['ship_to_different_address'])) {
+                if (strpos($requiredField, 'shipping_') !== false) {
+                    continue;
+                }
+            }
+
+            // add error if required field is empty
+            if (empty($checkoutFields[$requiredField])) {
+                array_push($errors, '<strong>' . $requiredField . '</strong> is a required field' );
+            }
+
+        }
+
+        return $errors;
+
+    }
+
 }
 
 ?>
