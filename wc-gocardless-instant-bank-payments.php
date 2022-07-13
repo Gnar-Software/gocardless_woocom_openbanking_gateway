@@ -1,13 +1,13 @@
 <?php
 
 /*
- * Plugin Name: GoCardless Instant Bank Payments
+ * Plugin Name: Instant Bank Payments via GoCardless for WooCommerce
  * Description: A payment gateway for WooCommerce and GoCardless. Take instant bank payments using open banking technology, payments clear almost instantly. Only available for customers in the UK and Germany.
- * Version: 1.0.1
+ * Version: 1.1.0
  * Author: gnar software
  * Author URI: https://www.gnar.co.uk/
  * License: GPLv2 or later
- * Text Domain: gc-openbanking-wc-gateway
+ * Text Domain: wc-gocardless-instant-bank-payments
 */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -34,7 +34,6 @@ class gc_ob_wc_gateway {
 
     public object $gatewayWoocom;
     public object $gatewayGocardless;
-    public array  $requiredFields;
 
 
     public function __construct() {
@@ -53,7 +52,7 @@ class gc_ob_wc_gateway {
         add_action( 'wp_ajax_nopriv_initBillingRequest', [$this, 'initBillingRequestController'] );
 
         // CHECKOUT FIELD VALIDATION
-        add_filter( 'checkout_submitted_pre_gc_flow', [$this, 'validateCheckoutFields'], 10, 2 );
+        add_filter( 'checkout_submitted_pre_gc_flow', ['gateway_woocom', 'gcValidateCheckoutFields'], 10, 3 );
 
     }
 
@@ -152,7 +151,7 @@ class gc_ob_wc_gateway {
         // checkout fields validation hook
         wc_clear_notices();
 
-        $errorMessages = apply_filters( 'checkout_submitted_pre_gc_flow', $errorMessages = [], $checkoutFields = $_POST['checkout_fields'] );
+        $errorMessages = apply_filters( 'checkout_submitted_pre_gc_flow', $errorMessages = [], $checkoutFields = $_POST['checkout_fields'], $requiredFields = $_POST['required_fields'] );
 
         if (!empty($errorMessages)) {
             $errorResponse = [
@@ -166,54 +165,9 @@ class gc_ob_wc_gateway {
         $this->instantiateGateway();
         $this->gatewayGocardless->initBillingRequest();
 
-    } 
-
-
-    /**
-     *  CHECKOUT FIELD VALIDATION
-     */
-
-    public function validateCheckoutFields($errors, $checkoutFields) {
-
-        $checkoutFieldsObj = json_decode(stripslashes($checkoutFields), true);
-        $fieldErrors = [];
-        
-        add_filter( 'woocommerce_checkout_fields', [$this, 'getRequiredFields'], 10, 1);
-        
-        error_log('required fields: ' . json_encode($this->requiredFields));
-
-        foreach ($this->requiredFields as $requiredField) {
-            array_push($fieldErrors, $requiredField);
-        }
-
-        die(json_encode([
-            'validation_error' => true,
-            'error' => $fieldErrors
-        ]));
-
     }
 
 
-    public function getRequiredFields($fields) {
-
-        $requiredFields = [];
-
-        foreach ($fields['billing'] as $billingFieldName => $billingField) {
-            if (!empty($billingField['validate'])) {
-                array_push($requiredFields, $billingFieldName);
-            }
-        }
-
-        foreach ($fields['shipping'] as $shippingFieldName => $shippingField) {
-            if (!empty($shippingField['validate'])) {
-                array_push($requiredFields, $shippingFieldName);
-            }
-        }
-
-        $this->requiredFields = $requiredFields;
-
-        return $fields;
-    }
 }
 
 new gc_ob_wc_gateway();

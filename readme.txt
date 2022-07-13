@@ -1,5 +1,5 @@
-=== Woocommerce GoCardless Instant Bank Payments ===
-Contributors: gnar
+=== Instant Bank Payments via GoCardless for WooCommerce ===
+Contributors: Gnar-Software, adamkentdev
 Tags: gocardless, instant bank pay, open banking, woocommerce, payment, gateway, bank transfer, credit card, card payments
 Requires at least: 5.9
 Tested up to: 5.9

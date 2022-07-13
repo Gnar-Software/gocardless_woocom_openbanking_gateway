@@ -1,4 +1,4 @@
-# GO CARDLESS OPEN BANKING WOOCOMMERCE PAYMENT GATEWAY
+# Instant Bank Payments via GoCardless for WooCommerce
 
 GoCardless open banking payment gateway for Woocommerce. Uses GC's open banking billing request flow and JS dropin.
 
@@ -17,4 +17,5 @@ Tested: PHP 7.4, Wordpress 6.0
 // checkout post validation hook -> prevent GC flow start
 - filter -> checkout_submitted_pre_gc_flow
     - arguments =   $errorMessages (array)  // add error message to array to prevent start of GC flow
-                    $checkoutFields (array) // unsanitized checkout fields
+                    $checkoutFields (json)  // unsanitized object of checkout field key values
+                    $requiredFields (json)  // unsanitized array of required checkout field keys
