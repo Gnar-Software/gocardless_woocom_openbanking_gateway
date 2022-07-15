@@ -60,7 +60,7 @@ class gateway_woocom extends WC_Payment_Gateway {
 
     public function init_form_fields() {
 
-        $webhookURL = get_home_url() . '/wp-json/' . GC_WEBHOOK_NAMESPACE . '/' . GC_WEBHOOK_ROUTE_PAYMENTS;
+        $webhookURL = get_home_url() . '/wp-json/' . GCOB_WEBHOOK_NAMESPACE . '/' . GCOB_WEBHOOK_ROUTE_PAYMENTS;
 
         // ENABLE, TITLE, DESCRIPTION, TEST MODE, ACCESS TOKEN
 
@@ -119,8 +119,10 @@ class gateway_woocom extends WC_Payment_Gateway {
 
         $order = new WC_Order( $order_id );
 
-        // Payment errors
+        // Flow not completed errors
         if (isset($_POST['gc_ob_error'])) {
+
+            $error = sanitize_text_field($_POST['gc_ob_error']);
 
             if ($order->has_status('pending')) {
                 $order->add_order_note('GC Payment flow was not completed');
@@ -131,12 +133,14 @@ class gateway_woocom extends WC_Payment_Gateway {
 
             $logger->info('GC: payment flow was not completed', array( 'source' => 'GoCardless Gateway' ));
             wc_add_notice( __('GoCardless payment error: did not complete payment flow', 'woothemes'), 'error' );
+
             return;
         }
 
+        // Billing request errors
         if (isset($_POST['gc_ob_br_error'])) {
 
-            $error = sanitize_text_field($_POST['gc_ob_error']);
+            $error = sanitize_text_field($_POST['gc_ob_br_error']);
 
             if ($order->has_status('pending')) {
                 $order->add_order_note('GC Payment flow -> Payment flow was completed but there was an error');
@@ -147,10 +151,13 @@ class gateway_woocom extends WC_Payment_Gateway {
 
             $logger->error('GC error: Payment flow was completed but there was an error ' . $error, array( 'source' => 'GoCardless Gateway' ));
             wc_add_notice( __('GoCardless payment error: sorry something went wrong', 'woothemes'), 'error' );
+
             return;
         }
 
+        // Error receiving customer ID, payment reference or payment ID
         if (!isset($_POST['gc_ob_customer_id']) || !isset($_POST['gc_ob_payment_ref']) || !isset($_POST['gc_ob_payment_id'])) {
+
             if ($order->has_status('pending')) {
                 $order->add_order_note('Error recieving payment reference from GC');
             }
@@ -160,13 +167,14 @@ class gateway_woocom extends WC_Payment_Gateway {
 
             $logger->error('Error recieving customer ID | payment ref | payment ID from GC', array( 'source' => 'GoCardless Gateway' ));
             wc_add_notice( __('GoCardless payment error: error recieving payment reference from GC', 'woothemes'), 'error' );
+
             return;
         }
 
         // Set payment details
-        $this->customerID = $_POST['gc_ob_customer_id'];
-        $this->paymentRef = $_POST['gc_ob_payment_ref'];
-        $this->paymentID  = $_POST['gc_ob_payment_id'];
+        $this->customerID = sanitize_text_field($_POST['gc_ob_customer_id']);
+        $this->paymentRef = sanitize_text_field($_POST['gc_ob_payment_ref']);
+        $this->paymentID  = sanitize_text_field($_POST['gc_ob_payment_id']);
 
         $order->update_meta_data('gc_ob_customer_id', $this->customerID);
         $order->update_meta_data('gc_ob_payment_ref', $this->paymentRef);
@@ -225,14 +233,14 @@ class gateway_woocom extends WC_Payment_Gateway {
         if ($this->testMode) {
             $gatewayGocardless = new gateway_gocardless(
                 $this->sandboxToken,
-                GC_SANDBOX_API_BASE,
+                GCOB_SANDBOX_API_BASE,
                 $this->testMode
             );
         }
         else {
             $gatewayGocardless = new gateway_gocardless(
                 $this->liveToken,
-                GC_LIVE_API_BASE,
+                GCOB_LIVE_API_BASE,
                 $this->testMode,
                 $this->reuseCustomers
             );
