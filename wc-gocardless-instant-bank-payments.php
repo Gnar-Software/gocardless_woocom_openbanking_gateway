@@ -3,7 +3,7 @@
 /*
  * Plugin Name: Instant Bank Payments via GoCardless for WooCommerce
  * Description: A payment gateway for WooCommerce and GoCardless. Take instant bank payments using open banking technology, payments clear almost instantly. Only available for customers in the UK and Germany.
- * Version: 1.1.0
+ * Version: 1.1.1
  * Author: gnar software
  * Author URI: https://www.gnar.co.uk/
  * License: GPLv2 or later
@@ -14,19 +14,19 @@ if ( ! defined( 'ABSPATH' ) ) {
     exit;
 }
 
-define( 'GC_PLUGIN_DIR',                     plugin_dir_path( __FILE__ ) );
-define( 'GC_LIB_DIR',                        plugin_dir_path( __FILE__ ) . '/lib' );
-define( 'GC_JS_DIR',                         plugin_dir_url( __FILE__ ) . '/js' );
-define( 'GC_JS_DROPIN_URI',                 'https://pay.gocardless.com/billing/static/dropin/v2/initialise.js' );
-define( 'GC_SANDBOX_API_BASE',              'https://api-sandbox.gocardless.com/' );
-define( 'GC_LIVE_API_BASE',                 'https://api.gocardless.com/' );
-define( 'GC_BILLING_REQUEST_ENDPOINT',      'billing_requests' );
-define( 'GC_BILLING_REQUEST_FLOW_ENDPOINT', 'billing_request_flows' );
-define( 'GC_PAYMENTS_ENDPOINT',             'payments' );
-define( 'GC_API_VERSION',                   '2015-07-06' );
-define( 'GC_WC_ORDER_RECIEVED_URL',         '/order-recieved' );
-define( 'GC_WEBHOOK_NAMESPACE',             'gateway_gc_wc/v1' );
-define( 'GC_WEBHOOK_ROUTE_PAYMENTS',        'payments' );
+define( 'GCOB_PLUGIN_DIR',                     plugin_dir_path( __FILE__ ) );
+define( 'GCOB_LIB_DIR',                        plugin_dir_path( __FILE__ ) . '/lib' );
+define( 'GCOB_JS_DIR',                         plugin_dir_url( __FILE__ ) . '/js' );
+define( 'GCOB_JS_DROPIN_URI',                 'https://pay.gocardless.com/billing/static/dropin/v2/initialise.js' );
+define( 'GCOB_SANDBOX_API_BASE',              'https://api-sandbox.gocardless.com/' );
+define( 'GCOB_LIVE_API_BASE',                 'https://api.gocardless.com/' );
+define( 'GCOB_BILLING_REQUEST_ENDPOINT',      'billing_requests' );
+define( 'GCOB_BILLING_REQUEST_FLOW_ENDPOINT', 'billing_request_flows' );
+define( 'GCOB_PAYMENTS_ENDPOINT',             'payments' );
+define( 'GCOB_API_VERSION',                   '2015-07-06' );
+define( 'GCOB_WC_ORDER_RECIEVED_URL',         '/order-recieved' );
+define( 'GCOB_WEBHOOK_NAMESPACE',             'gateway_gc_wc/v1' );
+define( 'GCOB_WEBHOOK_ROUTE_PAYMENTS',        'payments' );
 
 
 
@@ -72,9 +72,9 @@ class gc_ob_wc_gateway {
      */
 
     public function instantiateGateway() {
-        include_once( GC_LIB_DIR . '/gateway-woocom.php' );
-        include_once( GC_LIB_DIR . '/gateway-gocardless.php' );
-        include_once( GC_LIB_DIR . '/gateway-webhook.php' );
+        include_once( GCOB_LIB_DIR . '/gateway-woocom.php' );
+        include_once( GCOB_LIB_DIR . '/gateway-gocardless.php' );
+        include_once( GCOB_LIB_DIR . '/gateway-webhook.php' );
 
         $this->gatewayWoocom = new gateway_woocom();
 
@@ -85,7 +85,7 @@ class gc_ob_wc_gateway {
             if ($this->gatewayWoocom->testMode) {
                 $this->gatewayGocardless = new gateway_gocardless(
                     $this->gatewayWoocom->sandboxToken,
-                    GC_SANDBOX_API_BASE,
+                    GCOB_SANDBOX_API_BASE,
                     $this->gatewayWoocom->testMode
                 );
             }
@@ -94,7 +94,7 @@ class gc_ob_wc_gateway {
             else {
                 $this->gatewayGocardless = new gateway_gocardless(
                     $this->gatewayWoocom->liveToken,
-                    GC_LIVE_API_BASE,
+                    GCOB_LIVE_API_BASE,
                     $this->gatewayWoocom->testMode
                 );
             }
@@ -108,21 +108,12 @@ class gc_ob_wc_gateway {
 
 
     /**
-     *  PLUGIN ACTIVATION
-     */
-
-    public function pluginActivation() {
-        
-    }
-
-
-    /**
      *  ENQUEUE & LOCALIZE SCRIPTS
      */
 
     public function enqueueScripts() {
-        wp_enqueue_script( 'gc-dropin', GC_JS_DROPIN_URI, array(), '1.0.0' );
-        wp_enqueue_script( 'gc-wc-gateway', GC_JS_DIR . '/gc-wc-gateway.js', array( 'jquery', 'gc-dropin' ), '1.0.0' );
+        wp_enqueue_script( 'gc-dropin', GCOB_JS_DROPIN_URI, array(), '1.0.0' );
+        wp_enqueue_script( 'gc-wc-gateway', GCOB_JS_DIR . '/gc-wc-gateway.js', array( 'jquery', 'gc-dropin' ), '1.0.0' );
     
         $gcGatewayVars = [
             'ajax_url' => admin_url('admin-ajax.php'),
