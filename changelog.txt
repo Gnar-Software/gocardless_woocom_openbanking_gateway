@@ -4,6 +4,7 @@
 * Replaced CURL requests with WP HTTP API
 * Post input sanitization
 * Corrected readme.txt information
+* Removed some surplus code (re-use GC customer functionality)
 
 = 1.1.0 - 13-07-2022 =
 * Added server side required checkout field validation

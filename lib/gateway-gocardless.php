@@ -283,7 +283,7 @@ class gateway_gocardless {
 
     private function getAPIRequest($URI) {
 
-        $response = wp_get_request($URI, [
+        $response = wp_remote_get($URI, [
             'headers' => [
                 'Content-Type' => 'application/json',
                 'Authorization' => 'Bearer ' . $this->accessToken,

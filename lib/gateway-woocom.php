@@ -258,7 +258,7 @@ class gateway_woocom extends WC_Payment_Gateway {
      *  CHECKOUT FIELD VALIDATION
      */
 
-    public function gcValidateCheckoutFields($errors, $checkoutFields, $requiredFields) {
+    public static function gcValidateCheckoutFields($errors, $checkoutFields, $requiredFields) {
 
         $checkoutFields = json_decode(stripslashes($checkoutFields), true);
         $requiredFields = json_decode(stripslashes($requiredFields));
