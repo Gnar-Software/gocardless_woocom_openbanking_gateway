@@ -245,9 +245,9 @@ class gateway_gocardless {
         $response = wp_remote_post($URI, [
             'method'  => 'POST',
             'headers' => [
-                'Content-Type: application/json',
-                'Authorization: Bearer ' . $this->accessToken,
-                'GoCardless-Version: ' . GCOB_API_VERSION
+                'Content-Type' => 'application/json',
+                'Authorization' => 'Bearer ' . $this->accessToken,
+                'GoCardless-Version' => GCOB_API_VERSION
             ],
             'body'    => json_encode($body)
         ]);
@@ -267,7 +267,13 @@ class gateway_gocardless {
         // $response = curl_exec($ch);
         // curl_close($ch);
 
-        return $response;
+        $responseObj = json_decode(wp_remote_retrieve_body($response));
+
+        if (isset($responseObj->error)) {
+            error_log('GCOB API response error:' . $responseObj->error);
+        }
+ 
+        return $responseObj;
     }
 
 
@@ -279,11 +285,13 @@ class gateway_gocardless {
 
         $response = wp_get_request($URI, [
             'headers' => [
-                'Content-Type: application/json',
-                'Authorization: Bearer ' . $this->accessToken,
-                'GoCardless-Version: ' . GCOB_API_VERSION
+                'Content-Type' => 'application/json',
+                'Authorization' => 'Bearer ' . $this->accessToken,
+                'GoCardless-Version' => GCOB_API_VERSION
             ]
         ]);
+
+        error_log('get response: ' . json_encode($response));
 
         if (is_wp_error($response)) {
             error_log('GCOB error: ' . $response->get_error_message());
@@ -306,7 +314,13 @@ class gateway_gocardless {
 
         // return json_decode($response);
 
-        return $response;
+        $responseObj = json_decode(wp_remote_retrieve_body($response));
+
+        if (isset($responseObj->error)) {
+            error_log('GCOB API response error:' . $responseObj->error);
+        }
+ 
+        return $responseObj;
     }
 }
 
