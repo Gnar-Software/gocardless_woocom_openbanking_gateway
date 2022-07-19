@@ -53,19 +53,9 @@ class gateway_gocardless {
         $response['paymentDescription'] = $this->paymentDescription;
         $response['mode'] = $this->mode;
 
-        
-        // customer
-        // if ($this->reuseCustomer) {
-        //     $customerEmail = $this->getCustomerEmail();
-        //     if (!empty($customerEmail)) {
-        //         $this->gcCustomerID = $this->retrieveCustomer($customerEmail);
-        //     }
-        // }
-
 
         // billing request
         $billingRequestResponse = $this->createBillingRequest();
-        //$response['billingReqResponse'] = $billingRequestResponse;
 
         if (isset($billingRequestResponse->error)) {
             $response['status'] = 'error';
@@ -80,7 +70,6 @@ class gateway_gocardless {
 
         // billing request flow
         $billingRequestFlowResponse = $this->createBillingRequestFlow();
-        //$response['billingRequestFlowResponse'] = $billingRequestFlowResponse;
 
         if (isset($billingRequestFlowResponse->error)) {
             $response['status'] = 'error';
@@ -97,26 +86,6 @@ class gateway_gocardless {
 
         die(json_encode($response));
     }
-
-
-    /**
-     *  GET CUSTOMER EMAIL
-     */
-
-    // private function getCustomerEmail() {
-
-    //     if (is_user_logged_in()) {
-    //         $current_user = wp_get_current_user();
-    //         return $current_user->user_email;
-    //     }
-    //     else {
-    //         if (!empty($_POST['billing_email'])) {
-    //             return empty($_POST['billing_email']);
-    //         }
-    //     }
-
-    //     return;
-    // }
 
 
     /**
@@ -256,21 +225,10 @@ class gateway_gocardless {
             error_log('GCOB error: ' . $response->get_error_message());
         }
 
-        // $ch = curl_init($URI);
-
-        // curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
-        // curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-        // curl_setopt($ch, CURLOPT_POST, 1);
-        // curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($body));
-        // curl_setopt($ch, CURLOPT_FOLLOWLOCATION, 1);
-
-        // $response = curl_exec($ch);
-        // curl_close($ch);
-
         $responseObj = json_decode(wp_remote_retrieve_body($response));
 
         if (isset($responseObj->error)) {
-            error_log('GCOB API response error:' . $responseObj->error);
+            error_log('GCOB API response error:' . json_encode($responseObj->error));
         }
  
         return $responseObj;
@@ -297,27 +255,10 @@ class gateway_gocardless {
             error_log('GCOB error: ' . $response->get_error_message());
         }
 
-        // $headers = [
-        //     'Content-Type: application/json',
-        //     'Authorization: Bearer ' . $this->accessToken,
-        //     'GoCardless-Version: ' . GC_API_VERSION
-        // ];
-        
-        // $ch = curl_init($URI);
-
-        // curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
-        // curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-        // curl_setopt($ch, CURLOPT_FOLLOWLOCATION, 1);
-
-        // $response = curl_exec($ch);
-        // curl_close($ch);
-
-        // return json_decode($response);
-
         $responseObj = json_decode(wp_remote_retrieve_body($response));
 
         if (isset($responseObj->error)) {
-            error_log('GCOB API response error:' . $responseObj->error);
+            error_log('GCOB API response error:' . json_encode($responseObj->error));
         }
  
         return $responseObj;
