@@ -38,10 +38,6 @@ class gc_ob_wc_gateway {
 
     public function __construct() {
 
-        if (!class_exists('WooCommerce')) {
-            return;
-        }
-
         // INSTANTIATE GATEWAY
         add_action( 'plugins_loaded', [$this, 'instantiateGateway'] );
 
@@ -76,6 +72,11 @@ class gc_ob_wc_gateway {
      */
 
     public function instantiateGateway() {
+
+        if (!class_exists('WooCommerce')) {
+            return;
+        }
+
         include_once( GCOB_LIB_DIR . '/gateway-woocom.php' );
         include_once( GCOB_LIB_DIR . '/gateway-gocardless.php' );
         include_once( GCOB_LIB_DIR . '/gateway-webhook.php' );
