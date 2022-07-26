@@ -23,7 +23,7 @@
     });
 
 
-    // INIT GO CARDLESS FLOW
+    // INIT GOCARDLESS FLOW
 
     function initGCFlow() {
 

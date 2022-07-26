@@ -3,7 +3,7 @@
 /*
  * Plugin Name: Instant Bank Payments via GoCardless for WooCommerce
  * Description: A payment gateway for WooCommerce and GoCardless. Take instant bank payments using open banking technology, payments clear almost instantly. Only available for customers in the UK and Germany.
- * Version: 1.1.1
+ * Version: 1.1.2
  * Author: gnar software
  * Author URI: https://www.gnar.co.uk/
  * License: GPLv2 or later
@@ -37,6 +37,10 @@ class gc_ob_wc_gateway {
 
 
     public function __construct() {
+
+        if (!class_exists('WooCommerce')) {
+            return;
+        }
 
         // INSTANTIATE GATEWAY
         add_action( 'plugins_loaded', [$this, 'instantiateGateway'] );

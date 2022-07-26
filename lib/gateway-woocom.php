@@ -22,8 +22,8 @@ class gateway_woocom extends WC_Payment_Gateway {
         $this->id = 'gc_ob_wc_gateway';
         $this->icon = '';
         $this->has_fields = false;
-        $this->method_title = 'Go Cardless Open Banking';
-        $this->method_description = 'Go Cardless open banking integration using the billing request flow';
+        $this->method_title = 'GoCardless Instant Bank Pay';
+        $this->method_description = 'Instant bank payments using open banking technology.';
 
         if (!defined('DOING_AJAX') || !DOING_AJAX) {
             // settings
@@ -68,7 +68,7 @@ class gateway_woocom extends WC_Payment_Gateway {
             'enabled' => array(
                 'title'   => 'Enable/Disable',
                 'type'    => 'checkbox',
-                'label'   => 'Enable Go Cardless Open Banking Gateway',
+                'label'   => 'Enable GoCardless Instant Bank Pay Gateway',
                 'default' => 'yes'
             ),
             'payment_method_title' => array(
@@ -102,7 +102,7 @@ class gateway_woocom extends WC_Payment_Gateway {
                 'title'   => 'Webhook secret *',
                 'type'    => 'text',
                 'required'=> true,
-                'description' => 'Generate your webhook secret in the GoCardless Dashboard: <br/><br/> - Give your webhook a meaningfull name such as your website address <br/> - Use this URL: "' . $webhookURL . '".<br/> - Paste the secret generated above.'
+                'description' => 'Generate your webhook secret in the GoCardless Dashboard: <br/><br/> - Give your webhook a meaningful name such as your website address. <br/> - Use this URL: "' . $webhookURL . '".<br/> - Paste the secret generated above.'
             )
         );
 
@@ -194,13 +194,13 @@ class gateway_woocom extends WC_Payment_Gateway {
 
         // set order status if it's confirmed
         if ($this->paymentStatus == 'confirmed') {
-            $orderNote = 'Go Cardless Payment Succesful: CustomerID - ' . $this->customerID . ' PaymentRef - ' . $this->paymentRef . ' PaymentID - ' . $this->paymentID;
+            $orderNote = 'GoCardless Payment Succesful: CustomerID - ' . $this->customerID . ' PaymentRef - ' . $this->paymentRef . ' PaymentID - ' . $this->paymentID;
             $logger->info('GC payment was confirmed during checkout flow -> order: ' . $order_id, array( 'source' => 'GoCardless Gateway' ));
             $order->update_status('processing', $orderNote);
         }
         else {
             // else .. Customer bank authorised / awaiting payment
-            $orderNote = 'Go Cardless Instant bank payment authorised (awaiting payment): CustomerID - ' . $this->customerID . ' PaymentRef - ' . $this->paymentRef . ' PaymentID - ' . $this->paymentID;
+            $orderNote = 'GoCardless Instant bank payment authorised (awaiting payment): CustomerID - ' . $this->customerID . ' PaymentRef - ' . $this->paymentRef . ' PaymentID - ' . $this->paymentID;
             $logger->info('GC payment was successful but payment is still pending at checkout completion -> order: ' . $order_id, array( 'source' => 'GoCardless Gateway' ));
             $order->update_status('pending_payment', $orderNote);
         }
@@ -218,7 +218,7 @@ class gateway_woocom extends WC_Payment_Gateway {
 
 
     /**
-     *  VERIFY PAYMENT WITH GO CARDLESS
+     *  VERIFY PAYMENT WITH GOCARDLESS
      */
 
     public function verifyPayment() {

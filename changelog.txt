@@ -1,5 +1,9 @@
 *** Changelog ***
 
+= 1.1.2 - 26-07-2022 =
+* Fixed text typos
+* Fixed critical error if WooCommerce isn't active
+
 = 1.1.1 - 15-07-2022 =
 * Replaced CURL requests with WP HTTP API
 * Post input sanitization

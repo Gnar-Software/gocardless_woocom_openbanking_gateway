@@ -4,7 +4,7 @@ Tags: gocardless, instant bank pay, open banking, woocommerce, payment, gateway,
 Requires at least: 5.8
 Tested up to: 6.0
 Requires PHP: 7.4
-Stable tag: 1.1.1
+Stable tag: 1.1.2
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -42,7 +42,7 @@ Currently, Instant Bank Pay is available for your customers based in the UK, and
 
 = Does the plugin integrate with WooCommerce subscriptions? =
 
-No, but we will soon be releasing a premium plugin that will enable you to integrate with WooCoommerce subscriptions and set up direct debit mandates whist still taking the first payment by instant bank payment.
+No, but we will soon be releasing a premium plugin that will enable you to integrate with WooCoommerce subscriptions and set up direct debit mandates whilst still taking the first payment by instant bank payment.
 
 = Do I need an SSL certificate? =
 
