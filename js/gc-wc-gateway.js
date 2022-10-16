@@ -16,6 +16,7 @@
                 return false;
             }
 
+            // this is the ultimate checkout submit
             gatewayFlowAlreadyStarted = false;
             return true;
         });
@@ -137,23 +138,26 @@
     // PAYMENT FLOW COMPLETE
 
     function paymentFlowComplete(billingRequest, billingRequestFlow) {
+
+        // todo: disable checkout form
+        checkoutFormOverlay();
         
+        // assemble form data
+        var formdata = new FormData();
+        formdata.append('action', 'gcobSubmitCheckout');
+        formdata.append('security', gcGateway.security)
+
         var customerID = billingRequest.resources.customer.id;
         var paymentRef = billingRequest.links.payment_request;
         var paymentID  = billingRequest.links.payment_request_payment;
+        formdata.append('gc_ob_customer_id', customerID);
+        formdata.append('gc_ob_payment_ref', customerID);
+        formdata.append('gc_ob_payment_id', customerID);
 
-        var checkoutForm = $('form.checkout');
+        var checkoutFields = getFormData($( 'form.checkout' ));
+        formdata.append('checkout_fields', JSON.stringify(checkoutFields));
 
-        if (customerID && paymentRef && paymentID) {
-            $(checkoutForm).append('<input type="hidden" name="gc_ob_customer_id" value="' + customerID + '">');
-            $(checkoutForm).append('<input type="hidden" name="gc_ob_payment_ref" value="' + paymentRef + '">');
-            $(checkoutForm).append('<input type="hidden" name="gc_ob_payment_id" value="' + paymentID + '">');
-        }
-        else {
-            $(checkoutForm).append('<input type="hidden" name="gc_ob_br_error" value="' + billingRequest + '">');
-        }
-        
-        $('form.checkout').submit();
+        ajaxSubmitCheckout();
     }
 
 
@@ -164,17 +168,39 @@
         console.log('error: ' + JSON.stringify(error));
         console.log('metadata: ' + JSON.stringify(metadata));
 
-        var checkoutForm = $('form.checkout');
-
-        // determine type of error
-        $(checkoutForm).append('<input type="hidden" name="gc_ob_error" value="error">');
-
-        //$(checkoutForm).submit();
-
         displayWoocomErrors('We have not processed your payment: ' + error);
-        
+
         gatewayFlowAlreadyStarted = false;
-        return;
+        return false;
+
+    }
+
+
+    // AJAX SUBMIT CHECKOUT TO ORDER CREATE HANDLER
+
+    function ajaxSubmitCheckout(formdata) {
+
+        $.ajax({
+            type: 'POST',
+            url: gcGateway.ajax_url,
+            contentType: false,
+            processData: false,
+            data: formdata,
+            success: function(data) {
+                // checkout submit errors
+                if (data.error) {
+                    console.log('Checkout submit error: ' + data.error);
+                }
+                // success -> redirect to order recieved
+                else {
+                    console.log('Success, redirecting to order recieved: ' + data.redirect);
+                }
+            },
+            error: function(data) {
+                // checkout submit ajax error
+                console.log('Checkout submit ajax error: ' + data);
+            }
+        });
 
     }
 
@@ -240,6 +266,16 @@
         });
 
         return requiredFields;
+    }
+
+
+    // CHECKOUT FORM OVERLAY
+
+    function checkoutFormOverlay() {
+
+        $('form.checkout').append('<div id="gcob_overlay" style="position: absolute; top: 0px; left: 0px; background: rgba(0,0,0,0.3); width: 100%; height: 100%; display: flex; align-items: center;"></div>');
+        $('#gcob_overlay').append('<p style="width: 100%; text-align: center;">Processing your order...</p>')
+
     }
 
 
