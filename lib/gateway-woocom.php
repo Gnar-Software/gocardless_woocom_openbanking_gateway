@@ -114,10 +114,19 @@ class gateway_woocom extends WC_Payment_Gateway {
      */
 
     public function process_payment($order_id) {
+        // should never reach here
+    }
+
+
+    /**
+     * MANUALY CREATE ORDER / PROCESS PAYMENT
+     */
+    public function manualCreatOrder() {
+
         global $woocommerce;
         $logger = wc_get_logger();
 
-        $order = new WC_Order( $order_id );
+        $order = new WC_Order();
 
         // Flow not completed errors (should not reach here)
         if (isset($_POST['gc_ob_error'])) {
@@ -216,6 +225,7 @@ class gateway_woocom extends WC_Payment_Gateway {
             'result' => 'success',
             'redirect' => $this->get_return_url( $order )
         );
+
 
     }
 

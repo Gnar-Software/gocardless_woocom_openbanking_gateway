@@ -4,6 +4,8 @@
 
     $(document).ready(function() {
 
+        // TODO: sort this!
+
         // INTERRUPT WC CHECKOUT PLACE ORDER UNTIL AFTER GC FLOW IS COMPLETE
         $( 'form.checkout' ).on( 'checkout_place_order', function() {
             var payment_method = jQuery( 'form.checkout input[name="payment_method"]:checked' ).val();
@@ -139,7 +141,7 @@
 
     function paymentFlowComplete(billingRequest, billingRequestFlow) {
 
-        // todo: disable checkout form
+        // TODO: disable checkout form & btn for failsafe
         checkoutFormOverlay();
         
         // assemble form data
@@ -190,6 +192,8 @@
                 // checkout submit errors
                 if (data.error) {
                     console.log('Checkout submit error: ' + data.error);
+
+                    // TODO: display error to user (still redirect to order recieved?)
                 }
                 // success -> redirect to order recieved
                 else {
