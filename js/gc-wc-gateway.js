@@ -169,7 +169,13 @@
         // determine type of error
         $(checkoutForm).append('<input type="hidden" name="gc_ob_error" value="error">');
 
-        $(checkoutForm).submit();
+        //$(checkoutForm).submit();
+
+        displayWoocomErrors('We have not processed your payment: ' + error);
+        
+        gatewayFlowAlreadyStarted = false;
+        return;
+
     }
 
 
