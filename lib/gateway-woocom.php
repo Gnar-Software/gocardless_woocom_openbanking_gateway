@@ -119,7 +119,7 @@ class gateway_woocom extends WC_Payment_Gateway {
 
         $order = new WC_Order( $order_id );
 
-        // Flow not completed errors
+        // Flow not completed errors (should not reach here)
         if (isset($_POST['gc_ob_error'])) {
 
             $error = sanitize_text_field($_POST['gc_ob_error']);
@@ -156,7 +156,7 @@ class gateway_woocom extends WC_Payment_Gateway {
         }
 
         // Error receiving customer ID, payment reference or payment ID
-        if (!isset($_POST['gc_ob_customer_id']) || !isset($_POST['gc_ob_payment_ref']) || !isset($_POST['gc_ob_payment_id'])) {
+        if (empty($_POST['gc_ob_customer_id']) || empty($_POST['gc_ob_payment_ref']) || empty($_POST['gc_ob_payment_id'])) {
 
             if ($order->has_status('pending')) {
                 $order->add_order_note('Error recieving payment reference from GC');
@@ -176,10 +176,13 @@ class gateway_woocom extends WC_Payment_Gateway {
         $this->paymentRef = sanitize_text_field($_POST['gc_ob_payment_ref']);
         $this->paymentID  = sanitize_text_field($_POST['gc_ob_payment_id']);
 
-        $order->update_meta_data('gc_ob_customer_id', $this->customerID);
-        $order->update_meta_data('gc_ob_payment_ref', $this->paymentRef);
-        $order->update_meta_data('gc_ob_payment_id', $this->paymentID);
+        $logger->info('Reached process payment without errors. Saving: ' . 
+            $this->customerID . ' ' . $this->paymentRef . ' ' . $this->paymentID, 
+            array( 'source' => 'GoCardless Gateway' ));  
 
+        update_post_meta( $order_id, 'gc_ob_customer_id', $this->customerID );
+        update_post_meta( $order_id, 'gc_ob_payment_ref', $this->paymentRef );
+        update_post_meta( $order_id, 'gc_ob_payment_id', $this->paymentID );      
 
         // get payment status
         $this->paymentStatus = $this->verifyPayment();
