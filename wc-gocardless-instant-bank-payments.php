@@ -137,6 +137,9 @@ class gc_ob_wc_gateway {
 
     public function initBillingRequestController() {
 
+        global $woocommerce;
+        $logger = wc_get_logger();
+
         // authorize
         if (!check_ajax_referer( 'gc_ob_security_nonce', 'security', false )) {
             $logger = wc_get_logger();
