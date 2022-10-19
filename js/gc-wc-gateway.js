@@ -22,6 +22,13 @@
             }
         });
 
+
+        // SEND ERRORS TO SERVER
+        window.addEventListener('error', (event) => {
+            var error = event.type + ' ' + event.message + ' ' + event.filename + ' ' + event.lineno;
+            sendError(error);
+        });
+
     });
 
 
@@ -242,6 +249,64 @@
         });
 
         return requiredFields;
+    }
+
+
+    /**
+     * SEND NOTICES & ERRORS TO SERVER AJAX
+     * 
+     * @param {string} error
+     */
+    function sendError(error) {
+
+        var errorFormData = new FormData();
+        errorFormData.append('action', 'clientSideErrorLog');
+        errorFormData.append('security', gcGateway.security);
+        errorFormData.append('error', error);
+        
+        $.ajax({
+            type: 'POST',
+            url: gcGateway.ajax_url,
+            contentType: false,
+            processData: false,
+            data: errorFormData,
+            success: function(data) {
+                console.log('logged error');
+            },
+            error: function(data) {
+                console.log('logger did not work');
+            }
+        });
+
+    }
+
+
+    /**
+     * SEND NOTICES TO SERVER AJAX
+     * 
+     * @param {string} notice
+     */
+    function sendNotice(notice) {
+
+        var errorFormData = new FormData();
+        errorFormData.append('action', 'clientSideErrorLog');
+        errorFormData.append('security', gcGateway.security);
+        errorFormData.append('notice', notice);
+        
+        $.ajax({
+            type: 'POST',
+            url: gcGateway.ajax_url,
+            contentType: false,
+            processData: false,
+            data: errorFormData,
+            success: function(data) {
+                console.log('logged notice');
+            },
+            error: function(data) {
+                console.log('logger did not work');
+            }
+        });
+
     }
 
 
