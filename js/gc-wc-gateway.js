@@ -1,23 +1,25 @@
 (function($) {
 
-    var gatewayFlowAlreadyStarted = false;
-
     $(document).ready(function() {
 
-        // INTERRUPT WC CHECKOUT PLACE ORDER UNTIL AFTER GC FLOW IS COMPLETE
-        $( 'form.checkout' ).on( 'checkout_place_order', function() {
-            var payment_method = jQuery( 'form.checkout input[name="payment_method"]:checked' ).val();
+        // CHECKOUT SUBMIT BUTTON CLICK
+        let submitBtn     =  $( 'form.checkout [type="submit"]' );
+        let paymentMethod = $( 'form.checkout input[name="payment_method"]:checked' );
 
-            if (payment_method == 'gc_ob_wc_gateway' && !gatewayFlowAlreadyStarted) {
+        $( submitBtn ).on( 'click', function(e) {
+            var payment_method = $( paymentMethod ).val();
+
+            if (payment_method == 'gc_ob_wc_gateway') {
+
+                e.preventDefault();
+                e.stopPropagation();
+ 
+                // disable btn
+                $(submitBtn).prop('disabled', false);
                 
-                gatewayFlowAlreadyStarted = true;
-                console.log('gateway place order init');
+                console.log('gcob place order init');
                 initGCFlow();
-                return false;
             }
-
-            gatewayFlowAlreadyStarted = false;
-            return true;
         });
 
     });
