@@ -18,13 +18,27 @@
                 e.stopPropagation();
  
                 // disable btn
-                $(submitBtn).prop('disabled', false);
+                $(submitBtn).prop('disabled', true);
                 
                 console.log('gcob place order init');
+                sendNotice('Submit button clicked');
+
                 initGCFlow();
             }
         });
 
+
+        // IS CHECKOUT PAGE
+        if (gcGateway.is_checkout) {
+            console.log('is checkout');
+            sendNotice('Reached checkout');
+        }
+
+        // IS ORDER RECEIVED PAGE
+        if (gcGateway.is_order_recieved) {
+            console.log('is order recieved');
+            sendNotice('Reached order recieved page');
+        }
 
         // SEND ERRORS TO SERVER
         window.addEventListener('error', (event) => {
@@ -98,9 +112,9 @@
      * @returns 
      */
     function triggerGCModal(response) {
-        console.log('success: ' + response);
+        console.log('BR setup response: ' + response);
         var responseObj = JSON.parse(response);
-        console.log(responseObj);
+        sendNotice('Billing request response / server side checkout validation: ' + responseObj);
 
         // BAIL IF ERRORS
         if (responseObj.status == 'error') {
@@ -117,15 +131,13 @@
             return;
         }
 
+        // BAIL IF SERVERSIDE CHECKOUT VALIDATION ERRORS
         if (responseObj.validation_error) {
             console.log('validation error: ' + responseObj.validation_error);
             displayWoocomErrors(responseObj.validation_error);
             gatewayFlowAlreadyStarted = false;
             return;
         }
-
-        console.log(responseObj.BR_Flow_ID);
-        console.log(responseObj.mode);
 
         if (!responseObj.BR_Flow_ID || !responseObj.mode) {
             console.log('error: server response object does not contain flow ID or mode');
@@ -147,6 +159,8 @@
                 paymentFlowError(error, metadata);
             },
         });
+
+        sendNotice('Opening GC modal');
 
         // OPEN DROPIN
         handler.open();
@@ -176,6 +190,8 @@
         else {
             $(checkoutForm).append('<input type="hidden" name="gc_ob_br_error" value="' + billingRequest + '">');
         }
+
+        sendNotice('GC payment flow complete - submitting checkout form');
         
         $('form.checkout').submit();
     }
@@ -189,32 +205,26 @@
      * @returns 
      */
     function paymentFlowError(error, metadata) {
-        console.log('we had a issue!');
+
         console.log('error: ' + JSON.stringify(error));
-        console.log('metadata: ' + JSON.stringify(metadata));
-
-        var checkoutForm = $('form.checkout');
-
-        // determine type of error
-        $(checkoutForm).append('<input type="hidden" name="gc_ob_error" value="error">');
-
-        //$(checkoutForm).submit();
-
-        displayWoocomErrors('We have not processed your payment: ' + error);
+        displayWoocomErrors('Sorry we have not been able to process your payment: ' + error);
+        sendError('Payment flow error: ' + JSON.stringify(error));
         
-        gatewayFlowAlreadyStarted = false;
-        return;
+        // re-enable btn
+        $(submitBtn).prop('disabled', false);
 
+        return;
     }
 
 
     /**
      * BILLING REQUEST SETUP ERROR
      * 
-     * @param {*} response 
+     * @param {*} response
      */
     function billingRequestSetupError(response) {
-        console.log('ajax error: ' + response);
+        console.log('ajax error: ' + JSON.stringify(response));
+        sendError('Billing request setup error: ' + JSON.stringify(response));
     }
 
 
@@ -288,11 +298,15 @@
 
 
     /**
-     * SEND NOTICES & ERRORS TO SERVER AJAX
+     * SEND ERRORS TO SERVER AJAX
      * 
      * @param {string} error
      */
     function sendError(error) {
+
+        if (!gcGateway.front_end_logging) {
+            return;
+        }
 
         var errorFormData = new FormData();
         errorFormData.append('action', 'clientSideErrorLog');
@@ -322,6 +336,10 @@
      * @param {string} notice
      */
     function sendNotice(notice) {
+
+        if (!gcGateway.front_end_logging) {
+            return;
+        }
 
         var errorFormData = new FormData();
         errorFormData.append('action', 'clientSideErrorLog');

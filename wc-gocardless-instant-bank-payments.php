@@ -121,10 +121,13 @@ class gc_ob_wc_gateway {
         wp_enqueue_script( 'gc-wc-gateway', GCOB_JS_DIR . '/gc-wc-gateway.js', array( 'jquery', 'gc-dropin' ), '1.0.0' );
     
         $gcGatewayVars = [
-            'ajax_url' => admin_url('admin-ajax.php'),
-            'basket_url'=> wc_get_cart_url(),
-            'checkout_url' => wc_get_checkout_url(),
-            'security'  => wp_create_nonce( 'gc_ob_security_nonce' )
+            'ajax_url'          => admin_url('admin-ajax.php'),
+            'basket_url'        => wc_get_cart_url(),
+            'checkout_url'      => wc_get_checkout_url(),
+            'security'          => wp_create_nonce( 'gc_ob_security_nonce' ),
+            'is_checkout'       => is_wc_endpoint_url( 'checkout' ),
+            'is_order_recieved' => is_wc_endpoint_url( 'order-received' ),
+            'front_end_logging' => true
         ];
 
         wp_localize_script( 'gc-wc-gateway', 'gcGateway', $gcGatewayVars );
