@@ -50,6 +50,10 @@ class gc_ob_wc_gateway {
         // REGISTER AJAX ACTIONS
         add_action( 'wp_ajax_initBillingRequest', [$this, 'initBillingRequestController'] );
         add_action( 'wp_ajax_nopriv_initBillingRequest', [$this, 'initBillingRequestController'] );
+        add_action( 'wp_ajax_frontendNotice', ['gateway_woocom', 'frontendNotice'] );
+        add_action( 'wp_ajax_nopriv_frontendNotice', ['gateway_woocom', 'frontendNotice'] );
+        add_action( 'wp_ajax_frontendError', ['gateway_woocom', 'frontendError'] );
+        add_action( 'wp_ajax_nopriv_frontendError', ['gateway_woocom', 'frontendError'] );
 
         // CHECKOUT FIELD VALIDATION
         add_filter( 'checkout_submitted_pre_gc_flow', ['gateway_woocom', 'gcValidateCheckoutFields'], 10, 3 );

@@ -300,6 +300,31 @@ class gateway_woocom extends WC_Payment_Gateway {
 
     }
 
+
+    /**
+     * FRONT END NOTICE LOG
+     */
+
+    public static function frontendNotice() {
+
+        global $woocommerce;
+        $logger = wc_get_logger();
+
+        
+    }
+
+
+    /**
+     * FRONT END ERROR LOG
+     */
+
+    public static function frontendError() {
+        
+        global $woocommerce;
+        $logger = wc_get_logger();
+
+
+    }
 }
 
 ?>

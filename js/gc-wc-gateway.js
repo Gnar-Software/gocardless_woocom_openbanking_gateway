@@ -309,7 +309,7 @@
         }
 
         var errorFormData = new FormData();
-        errorFormData.append('action', 'clientSideErrorLog');
+        errorFormData.append('action', 'frontendError');
         errorFormData.append('security', gcGateway.security);
         errorFormData.append('error', error);
         
@@ -342,7 +342,7 @@
         }
 
         var errorFormData = new FormData();
-        errorFormData.append('action', 'clientSideErrorLog');
+        errorFormData.append('action', 'frontendNotice');
         errorFormData.append('security', gcGateway.security);
         errorFormData.append('notice', notice);
         
