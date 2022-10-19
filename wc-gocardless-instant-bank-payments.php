@@ -127,7 +127,7 @@ class gc_ob_wc_gateway {
             'security'          => wp_create_nonce( 'gc_ob_security_nonce' ),
             'is_checkout'       => is_wc_endpoint_url( 'checkout' ),
             'is_order_recieved' => is_wc_endpoint_url( 'order-received' ),
-            'front_end_logging' => true
+            'front_end_logging' => $this->gatewayWoocom->frontEndLogging
         ];
 
         wp_localize_script( 'gc-wc-gateway', 'gcGateway', $gcGatewayVars );

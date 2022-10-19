@@ -8,6 +8,7 @@ class gateway_woocom extends WC_Payment_Gateway {
 
     public bool $testMode;
     public bool $active = false;
+    public bool $frontEndLogging;
     public string $sandboxToken;
     public string $liveToken;
     public string $customerID;
@@ -39,6 +40,13 @@ class gateway_woocom extends WC_Payment_Gateway {
         }
         else {
             $this->testMode = false;
+        }
+
+        if ($this->get_option('front_end_logging') == 'yes') {
+            $this->frontEndLogging = true;
+        }
+        else {
+            $this->frontEndLogging = false;
         }
 
         $this->sandboxToken = $this->get_option('sandbox_access_token');
@@ -87,6 +95,12 @@ class gateway_woocom extends WC_Payment_Gateway {
                 'title'   => 'Enable Sandbox Mode',
                 'type'    => 'checkbox',
                 'label'   => 'Turn on test mode',
+                'default' => 'no'
+            ),
+            'front_end_logging' => array(
+                'title'   => 'Enable client side error logging',
+                'type'    => 'checkbox',
+                'label'   => 'Turn on client side error logging (bad for performance / good for sorting issues)',
                 'default' => 'no'
             ),
             'sandbox_access_token' => array(
