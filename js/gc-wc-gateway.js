@@ -1,5 +1,8 @@
 (function($) {
 
+    /**
+     * DOM READY
+     */
     $(document).ready(function() {
 
         // CHECKOUT SUBMIT BUTTON CLICK
@@ -32,8 +35,9 @@
     });
 
 
-    // INIT GOCARDLESS FLOW
-
+    /**
+     * INIT GOCARDLESS FLOW
+     */
     function initGCFlow() {
 
         // REMOVE ERROR FROM FORM IF PRESENT
@@ -63,8 +67,11 @@
     }
 
 
-    // AJAX TRIGGER BILLING REQUEST
-
+    /**
+     * AJAX TRIGGER BILLING REQUEST
+     * 
+     * @param {*} formdata 
+     */
     function ajaxTriggerBillingRequest(formdata) {
 
         $.ajax({
@@ -84,8 +91,12 @@
     }
 
 
-    // TRIGGER GC MODAL
-
+    /**
+     * TRIGGER GC MODAL
+     * 
+     * @param {*} response 
+     * @returns 
+     */
     function triggerGCModal(response) {
         console.log('success: ' + response);
         var responseObj = JSON.parse(response);
@@ -143,8 +154,12 @@
     }
 
 
-    // PAYMENT FLOW COMPLETE
-
+    /**
+     * PAYMENT FLOW COMPLETE
+     * 
+     * @param {*} billingRequest 
+     * @param {*} billingRequestFlow 
+     */
     function paymentFlowComplete(billingRequest, billingRequestFlow) {
         
         var customerID = billingRequest.resources.customer.id;
@@ -166,8 +181,13 @@
     }
 
 
-    // PAYMENT WINDOW CLOSED OR ERROR
-
+    /**
+     * PAYMENT WINDOW CLOSED OR ERROR
+     * 
+     * @param {*} error 
+     * @param {*} metadata 
+     * @returns 
+     */
     function paymentFlowError(error, metadata) {
         console.log('we had a issue!');
         console.log('error: ' + JSON.stringify(error));
@@ -188,15 +208,22 @@
     }
 
 
-    // BILLING REQUEST SETUP ERROR
-
+    /**
+     * BILLING REQUEST SETUP ERROR
+     * 
+     * @param {*} response 
+     */
     function billingRequestSetupError(response) {
         console.log('ajax error: ' + response);
     }
 
 
-    // DISPLAY WOOCOM VALIDATION ERRORS
-
+    /**
+     * DISPLAY WOOCOM VALIDATION ERRORS
+     * 
+     * @param {*} errors 
+     * @returns 
+     */
     function displayWoocomErrors(errors) {
         
         var errorUL = $( '.checkout ul.woocommerce-error' );
@@ -220,8 +247,12 @@
     }
 
 
-    // GET FORM DATA
-
+    /**
+     * GET FORM DATA
+     * 
+     * @param {*} $form 
+     * @returns 
+     */
     function getFormData($form) {
         var unindexed_array = $form.serializeArray();
         var indexed_array = {};
@@ -234,8 +265,12 @@
     }
 
 
-    // GET REQUIRED CHECKOUT FIELDS
-
+    /**
+     * GET REQUIRED CHECKOUT FIELDS
+     * 
+     * @param {*} fields 
+     * @returns 
+     */
     function getRequiredCheckoutFields(fields) {
 
         var requiredFields = [];
