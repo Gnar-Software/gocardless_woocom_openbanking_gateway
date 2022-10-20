@@ -84,6 +84,7 @@ class gc_ob_wc_gateway {
         include_once( GCOB_LIB_DIR . '/gateway-woocom.php' );
         include_once( GCOB_LIB_DIR . '/gateway-gocardless.php' );
         include_once( GCOB_LIB_DIR . '/gateway-webhook.php' );
+        include_once( GCOB_LIB_DIR . '/wc-front-end-logger.php' );
 
         $this->gatewayWoocom = new gateway_woocom();
 
@@ -122,7 +123,7 @@ class gc_ob_wc_gateway {
 
     public function enqueueScripts() {
         wp_enqueue_script( 'gc-dropin', GCOB_JS_DROPIN_URI, array(), '1.0.0' );
-        wp_enqueue_script( 'gc-wc-gateway', GCOB_JS_DIR . '/gc-wc-gateway.js', array( 'jquery', 'gc-dropin' ), '1.0.0' );
+        wp_enqueue_script( 'gc-wc-gateway', GCOB_JS_DIR . '/gc-wc-gateway.js', array( 'jquery', 'gc-dropin' ), '1.2.0' );
     
         $gcGatewayVars = [
             'ajax_url'          => admin_url('admin-ajax.php'),

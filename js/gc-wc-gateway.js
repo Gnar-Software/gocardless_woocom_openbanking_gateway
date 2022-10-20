@@ -108,7 +108,8 @@
             },
             error: function(data) {
                 billingRequestSetupError(data);
-            }
+            },
+            timeout: 4000
         });
 
     }
@@ -123,7 +124,7 @@
     function triggerGCModal(response) {
         console.log('BR setup response: ' + response);
         var responseObj = JSON.parse(response);
-        sendNotice('Billing request response / server side checkout validation: ' + responseObj);
+        sendNotice('Billing request, serverside checkout validation success - opening modal');
 
         // BAIL IF ERRORS
         if (responseObj.status == 'error') {
@@ -165,7 +166,7 @@
                 paymentFlowComplete(billingRequest, billingRequestFlow);
             },
             onExit: (error, metadata) => {
-                paymentFlowError(error, metadata);
+                paymentFlowExit(error, metadata);
             },
         });
 
@@ -213,11 +214,11 @@
      * @param {*} metadata 
      * @returns 
      */
-    function paymentFlowError(error, metadata) {
+    function paymentFlowExit(error, metadata) {
 
-        console.log('error: ' + JSON.stringify(error));
-        displayWoocomErrors('Sorry we have not been able to process your payment: ' + error);
-        sendError('Payment flow error: ' + JSON.stringify(error));
+        console.log('Payment flow was not completed');
+        displayWoocomErrors('Sorry we have not been able to process your payment - please retry');
+        sendNotice('Payment flow was not completed');
         
         // re-enable btn
         $(checkoutSubmitBtn).prop('disabled', false);
@@ -235,6 +236,7 @@
     function billingRequestSetupError(response) {
         console.log('ajax error: ' + JSON.stringify(response));
         sendError('Billing request setup error: ' + JSON.stringify(response));
+        displayWoocomErrors('There was a problem contacing GoCardless');
     }
 
 
@@ -254,15 +256,22 @@
 
         var parent = $('form.checkout ul.woocommerce-error');
 
-        if (errors == null) {
+        if (errors == null || errors.length < 1) {
             parent.empty();
             return;
         }
 
-        errors.forEach(function(error) {
-            parent.append('<li>' + error + '</li>');
-            console.log(error);
-        });
+        if (Array.isArray(errors)) {
+            errors.forEach(function(error) {
+                parent.append('<li>' + error + '</li>');
+                console.log(error);
+            });
+        }
+        else {
+            parent.append('<li>' + errors + '</li>');
+            console.log(errors);
+        }
+
 
     }
 
@@ -330,11 +339,10 @@
             processData: false,
             data: errorFormData,
             success: function(data) {
-                console.log('logged error');
-                console.log(JSON.stringify(data));
+
             },
             error: function(data) {
-                console.log('logger did not work');
+
             }
         });
 
@@ -364,11 +372,10 @@
             processData: false,
             data: errorFormData,
             success: function(data) {
-                console.log('logged notice');
-                console.log(JSON.stringify(data));
+
             },
             error: function(data) {
-                console.log('logger did not work');
+
             }
         });
 

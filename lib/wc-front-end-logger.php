@@ -8,9 +8,13 @@ class wc_front_end_logger {
      */
 
     public static function frontendNotice() {
-
         global $woocommerce;
         $logger = wc_get_logger();
+
+        if (!check_ajax_referer( 'gc_ob_security_nonce', 'security', false )) {
+            $logger->warning('Unnauthorised ajax request', array( 'source' => 'GoCardless Gateway' ));
+            wp_die();
+        }
 
         if (empty($_POST['notice'])) {
             die(json_encode([
@@ -33,9 +37,13 @@ class wc_front_end_logger {
      */
 
     public static function frontendError() {
-        
         global $woocommerce;
         $logger = wc_get_logger();
+
+        if (!check_ajax_referer( 'gc_ob_security_nonce', 'security', false )) {
+            $logger->warning('Unnauthorised ajax request', array( 'source' => 'GoCardless Gateway' ));
+            wp_die();
+        }
 
         if (empty($_POST['error'])) {
             die(json_encode([
