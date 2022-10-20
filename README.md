@@ -9,7 +9,8 @@ Tested: PHP 7.4, Wordpress 6.0
 # SCHEDULED
 
 - Woocommerce subscription support
-- Refund support 
+- Refund support
+- BUG: Rounding issue - price sent to GC cannot be parsed correctly if it's not 2 decimal places
 
 
 # ACTIONS / FILTERS / HOOKS

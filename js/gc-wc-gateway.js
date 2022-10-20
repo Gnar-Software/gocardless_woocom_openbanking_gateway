@@ -6,10 +6,14 @@
     $(document).ready(function() {
 
         // CHECKOUT SUBMIT BUTTON CLICK
-        let submitBtn     =  $( 'form.checkout [type="submit"]' );
+        let submitBtn     =  $( 'form.checkout :submit' );
+        console.log(submitBtn);
         let paymentMethod = $( 'form.checkout input[name="payment_method"]:checked' );
 
-        $( submitBtn ).on( 'click', function(e) {
+        $('form.woocommerce-checkout').on( 'click', "#place_order", function(e) {
+
+            console.log('btn clicked');
+
             var payment_method = $( paymentMethod ).val();
 
             if (payment_method == 'gc_ob_wc_gateway') {
