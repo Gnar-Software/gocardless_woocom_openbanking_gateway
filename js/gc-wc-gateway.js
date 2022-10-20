@@ -1,16 +1,20 @@
 (function($) {
 
+    var checkoutSubmitBtn;
+
+
     /**
      * DOM READY
      */
     $(document).ready(function() {
 
         // CHECKOUT SUBMIT BUTTON CLICK
-        let submitBtn     =  $( 'form.checkout :submit' );
-        console.log(submitBtn);
+        let checkoutForm  = $( 'form.woocommerce-checkout' );
         let paymentMethod = $( 'form.checkout input[name="payment_method"]:checked' );
 
-        $('form.woocommerce-checkout').on( 'click', "#place_order", function(e) {
+        $(checkoutForm).on( 'click', ':submit', function(e) {
+
+            checkoutSubmitBtn = this;
 
             console.log('btn clicked');
 
@@ -22,7 +26,8 @@
                 e.stopPropagation();
  
                 // disable btn
-                $(submitBtn).prop('disabled', true);
+                $(checkoutSubmitBtn).prop('disabled', true);
+                $(checkoutSubmitBtn).addClass('disabled');
                 
                 console.log('gcob place order init');
                 sendNotice('Submit button clicked');
@@ -215,7 +220,8 @@
         sendError('Payment flow error: ' + JSON.stringify(error));
         
         // re-enable btn
-        $(submitBtn).prop('disabled', false);
+        $(checkoutSubmitBtn).prop('disabled', false);
+        $(checkoutSubmitBtn).removeClass('disabled');
 
         return;
     }
@@ -325,6 +331,7 @@
             data: errorFormData,
             success: function(data) {
                 console.log('logged error');
+                console.log(JSON.stringify(data));
             },
             error: function(data) {
                 console.log('logger did not work');
@@ -358,6 +365,7 @@
             data: errorFormData,
             success: function(data) {
                 console.log('logged notice');
+                console.log(JSON.stringify(data));
             },
             error: function(data) {
                 console.log('logger did not work');
