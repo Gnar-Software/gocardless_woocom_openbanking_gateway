@@ -63,16 +63,8 @@
      */
     function initGCFlow() {
 
-        // REMOVE ERROR FROM FORM IF PRESENT
-        var errorField = $('input[name="gc_ob_error"]');
-
-        if (errorField) {
-            errorField.remove();
-        }
-
         // GET ENTERED BILLING EMAIL
         var billingEmail = $('input[name="billing_email"]');
-        
 
         // TRIGGER SERVER BILLING REQUEST
         var formdata = new FormData();
@@ -124,11 +116,11 @@
     function triggerGCModal(response) {
         console.log('BR setup response: ' + response);
         var responseObj = JSON.parse(response);
-        sendNotice('Billing request, serverside checkout validation success - opening modal');
+        sendNotice('Billing request, serverside checkout validation success');
 
-        // BAIL IF ERRORS
+        // BAIL IF MODAL LAUNCH ERRORS
         if (responseObj.status == 'error') {
-            console.log('error: ' + JSON.stringify(responseObj.error));
+            console.log('Modal launch error: ' + JSON.stringify(responseObj.error));
 
             var modalLaunchErrors = [];
             var modalLaunchErrorObjs = responseObj.error.errors;
@@ -137,7 +129,8 @@
             });
 
             displayWoocomErrors(modalLaunchErrors);
-            gatewayFlowAlreadyStarted = false;
+            sendError('Modal launch error: ' + JSON.stringify(responseObj.error));
+            enableCheckoutBtn();
             return;
         }
 
@@ -145,13 +138,16 @@
         if (responseObj.validation_error) {
             console.log('validation error: ' + responseObj.validation_error);
             displayWoocomErrors(responseObj.validation_error);
-            gatewayFlowAlreadyStarted = false;
+            sendNotice('Serverside checkout validation errors');
+            enableCheckoutBtn();
             return;
         }
 
+        // BAIL IF BILLING REQUEST FLOW AND MODE ARE NOT PRESENT
         if (!responseObj.BR_Flow_ID || !responseObj.mode) {
             console.log('error: server response object does not contain flow ID or mode');
-            gatewayFlowAlreadyStarted = false;
+            sendError('error: server response object does not contain flow ID or mode');
+            enableCheckoutBtn();
             return;
         }
 
@@ -186,6 +182,7 @@
      */
     function paymentFlowComplete(billingRequest, billingRequestFlow) {
         
+        // Add to form: customerID, paymentRef, paymentID
         var customerID = billingRequest.resources.customer.id;
         var paymentRef = billingRequest.links.payment_request;
         var paymentID  = billingRequest.links.payment_request_payment;
@@ -198,11 +195,17 @@
             $(checkoutForm).append('<input type="hidden" name="gc_ob_payment_id" value="' + paymentID + '">');
         }
         else {
-            $(checkoutForm).append('<input type="hidden" name="gc_ob_br_error" value="' + billingRequest + '">');
+            // BAIL IF MISSING: customerID, paymentRef, paymentID
+            sendError('CustomerID, PaymentRef, PaymentID not present after flow complete');
+            sendError(JSON.stringify(billingRequest));
+            console.log('CustomerID, PaymentRef, PaymentID not present after flow complete');
+            displayWoocomErrors('Payment flow was completed but there was an issue retrieving your payment reference, you may have been charged. Please contact the merchant.')
+            return;
         }
 
+        // submit checkout & re-enable btn incase order fails and returns to checkout
         sendNotice('GC payment flow complete - submitting checkout form');
-        
+        enableCheckoutBtn();
         $('form.checkout').submit();
     }
 
@@ -219,12 +222,18 @@
         console.log('Payment flow was not completed');
         displayWoocomErrors('Sorry we have not been able to process your payment - please retry');
         sendNotice('Payment flow was not completed');
-        
-        // re-enable btn
-        $(checkoutSubmitBtn).prop('disabled', false);
-        $(checkoutSubmitBtn).removeClass('disabled');
+        enableCheckoutBtn();
 
         return;
+    }
+
+
+    /**
+     * RE-ENABLE CHECKOUT SUBMIT BTN
+     */
+    function enableCheckoutBtn() {
+        $(checkoutSubmitBtn).prop('disabled', false);
+        $(checkoutSubmitBtn).removeClass('disabled');
     }
 
 

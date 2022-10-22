@@ -4,6 +4,7 @@
 * Payment flow triggered on button click rather than checkout submit to improve stability
 * Place order button disabled during flow to prevent multiple payment flows being created
 * Only creates WC order if payment flow was completed successfully
+* Payment flow errors now handled client side
 * Added option: ajax client side error and info logging
 * Updated icon and banner
 

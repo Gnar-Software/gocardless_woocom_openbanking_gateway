@@ -133,43 +133,7 @@ class gateway_woocom extends WC_Payment_Gateway {
 
         $order = new WC_Order( $order_id );
 
-        // Flow not completed errors (should not reach here)
-        if (isset($_POST['gc_ob_error'])) {
-
-            $error = sanitize_text_field($_POST['gc_ob_error']);
-
-            if ($order->has_status('pending')) {
-                $order->add_order_note('GC Payment flow was not completed');
-            }
-            else {
-                $order->update_status('pending', 'GC Payment flow was not completed');
-            }
-
-            $logger->info('GC: payment flow was not completed', array( 'source' => 'GoCardless Gateway' ));
-            wc_add_notice( __('GoCardless payment error: did not complete payment flow', 'woothemes'), 'error' );
-
-            return;
-        }
-
-        // Billing request errors
-        if (isset($_POST['gc_ob_br_error'])) {
-
-            $error = sanitize_text_field($_POST['gc_ob_br_error']);
-
-            if ($order->has_status('pending')) {
-                $order->add_order_note('GC Payment flow -> Payment flow was completed but there was an error');
-            }
-            else {
-                $order->update_status('pending', 'GC Payment flow -> Payment flow was completed but there was an error');
-            }
-
-            $logger->error('GC error: Payment flow was completed but there was an error ' . $error, array( 'source' => 'GoCardless Gateway' ));
-            wc_add_notice( __('GoCardless payment error: sorry something went wrong', 'woothemes'), 'error' );
-
-            return;
-        }
-
-        // Error receiving customer ID, payment reference or payment ID
+        // Error receiving customer ID, payment reference or payment ID (shouldn't get here)
         if (empty($_POST['gc_ob_customer_id']) || empty($_POST['gc_ob_payment_ref']) || empty($_POST['gc_ob_payment_id'])) {
 
             if ($order->has_status('pending')) {

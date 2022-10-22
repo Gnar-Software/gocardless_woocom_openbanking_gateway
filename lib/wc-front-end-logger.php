@@ -1,5 +1,8 @@
 <?php
 
+if ( ! defined( 'ABSPATH' ) ) {
+    exit;
+}
 
 class wc_front_end_logger {
 
@@ -10,6 +13,7 @@ class wc_front_end_logger {
     public static function frontendNotice() {
         global $woocommerce;
         $logger = wc_get_logger();
+        $customerID = WC()->session->get_customer_id();
 
         if (!check_ajax_referer( 'gc_ob_security_nonce', 'security', false )) {
             $logger->warning('Unnauthorised ajax request', array( 'source' => 'GoCardless Gateway' ));
@@ -24,7 +28,7 @@ class wc_front_end_logger {
 
         $notice = sanitize_text_field($_POST['notice']);
 
-        $logger->info('GC front end log: ' . $notice, array( 'source' => 'GoCardless Gateway' ));
+        $logger->info('GC front end log (CustomerID: ' . $customerID . '): ' . $notice, array( 'source' => 'GoCardless Gateway' ));
 
         die(json_encode([
             'status' => 'success'
@@ -39,6 +43,7 @@ class wc_front_end_logger {
     public static function frontendError() {
         global $woocommerce;
         $logger = wc_get_logger();
+        $customerID = WC()->session->get_customer_id();
 
         if (!check_ajax_referer( 'gc_ob_security_nonce', 'security', false )) {
             $logger->warning('Unnauthorised ajax request', array( 'source' => 'GoCardless Gateway' ));
@@ -53,7 +58,7 @@ class wc_front_end_logger {
 
         $error = sanitize_text_field($_POST['error']);
 
-        $logger->error('GC front end error: ' . $error, array( 'source' => 'GoCardless Gateway' ));
+        $logger->error('GC front end error (CustomerID: ' . $customerID . '): ' . $error, array( 'source' => 'GoCardless Gateway' ));
 
         $loggerResponse = [
             'status' => 'success'
