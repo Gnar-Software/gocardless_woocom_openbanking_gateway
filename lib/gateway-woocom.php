@@ -158,7 +158,6 @@ class gateway_woocom extends WC_Payment_Gateway {
             $this->customerID . ' ' . $this->paymentRef . ' ' . $this->paymentID, 
             array( 'source' => 'GoCardless Gateway' ));  
 
-        update_post_meta( $order_id, 'gc_ob_customer_id', $this->customerID );
         update_post_meta( $order_id, 'gc_ob_payment_ref', $this->paymentRef );
         update_post_meta( $order_id, 'gc_ob_payment_id', $this->paymentID );      
 
@@ -231,7 +230,6 @@ class gateway_woocom extends WC_Payment_Gateway {
 
         return $paymentStatus;
 
-
     }
 
 
@@ -264,6 +262,42 @@ class gateway_woocom extends WC_Payment_Gateway {
 
     }
 
+
+    /**
+     * AJAX CREATE ORDER
+     * 
+     * @param  string $gcCustomerID
+     * @return int|WP_ERROR $orderID
+     */
+    public static function ajaxCreateOrder(string $gcCustomerID) {
+
+        $checkoutData = json_decode(stripslashes($_POST['checkout_fields']), true);
+
+        $checkout = new WC_Checkout();
+        $orderID = $checkout->create_order($checkoutData);
+
+        /**
+         * Check for order creation error - bail
+         */
+        if (is_wp_error($orderID)) {
+            return $orderID;
+        }
+
+        /**
+         * Else order created - set order_awaiting_payment session var to 
+         * avoid subsequent duplicate orders being created, and return orderID
+         */
+        else {
+            // order created, return order id in filter to prevent duplicate order creation
+            $response['order_id'] = $orderID;
+
+            WC()->session->set( 'order_awaiting_payment', $orderID );
+
+            // add GC customer ID to order data
+            update_post_meta( $orderID, 'gc_ob_customer_id', $gcCustomerID );
+
+        }
+    }
 
 
 }
