@@ -1,0 +1,35 @@
+
+/* Temporary customer notice for GoCardless Instant Bank Pay */
+
+#gc-temp-instruction {
+    position: fixed;
+    top: 0px;
+    width: 100vw;
+    background: white;
+    color: rgb(200,19,19);
+    line-height: 1.2em;
+    padding-left: 5px;
+    padding-right: 5px;
+    height: 50px;
+    font-size: 16px;
+    max-width: 100%;
+}
+#gc-temp-instruction > div {
+    height: 100%;
+    display: flex;
+    text-align: center;
+    align-items: center;
+    justify-content: center;
+}
+body.using-gc iframe {
+    margin-top: 50px !important;
+}
+
+@media (max-width: 550px) {
+    #gc-temp-instruction {
+        height: 100px;
+    }
+    body.using-gc iframe {
+        margin-top: 100px !important;
+    }
+}

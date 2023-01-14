@@ -78,6 +78,12 @@
         var requiredFields = getRequiredCheckoutFields(checkoutFields);
         formdata.append('required_fields', JSON.stringify(requiredFields));
 
+        // Add temp note to customers
+        setTimeout(function() {
+            $('body').addClass('using-gc');
+            $('body').append('<div id="gc-temp-instruction"><div>IMPORTANT: After completing your payment via GoCardless, please ensure you click the "Close Window" button to complete your order.</div></div>');
+        }, 10000);
+
         ajaxTriggerBillingRequest(formdata);
     }
 
@@ -222,6 +228,7 @@
         console.log('Payment flow was not completed');
         displayWoocomErrors('Sorry we have not been able to process your payment - please retry');
         sendNotice('Payment flow was not completed');
+        $('body').removeClass('using-gc');
         enableCheckoutBtn();
 
         return;

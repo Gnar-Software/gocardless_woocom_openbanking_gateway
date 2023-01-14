@@ -3,7 +3,7 @@
 /*
  * Plugin Name: Instant Bank Payments via GoCardless for WooCommerce
  * Description: A payment gateway for WooCommerce and GoCardless. Take instant bank payments using open banking technology, payments clear almost instantly. Only available for customers in the UK and Germany.
- * Version: 1.2.0
+ * Version: 1.2.1
  * Author: gnar software
  * Author URI: https://www.gnar.co.uk/
  * License: GPLv2 or later
@@ -17,6 +17,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 define( 'GCOB_PLUGIN_DIR',                     plugin_dir_path( __FILE__ ) );
 define( 'GCOB_LIB_DIR',                        plugin_dir_path( __FILE__ ) . '/lib' );
 define( 'GCOB_JS_DIR',                         plugin_dir_url( __FILE__ ) . '/js' );
+define( 'GCOB_CSS_DIR',                        plugin_dir_url( __FILE__ ) . '/css' );
 define( 'GCOB_JS_DROPIN_URI',                 'https://pay.gocardless.com/billing/static/dropin/v2/initialise.js' );
 define( 'GCOB_SANDBOX_API_BASE',              'https://api-sandbox.gocardless.com/' );
 define( 'GCOB_LIVE_API_BASE',                 'https://api.gocardless.com/' );
@@ -123,7 +124,7 @@ class gc_ob_wc_gateway {
 
     public function enqueueScripts() {
         wp_enqueue_script( 'gc-dropin', GCOB_JS_DROPIN_URI, array(), '1.0.0' );
-        wp_enqueue_script( 'gc-wc-gateway', GCOB_JS_DIR . '/gc-wc-gateway.js', array( 'jquery', 'gc-dropin' ), '1.2.0' );
+        wp_enqueue_script( 'gc-wc-gateway', GCOB_JS_DIR . '/gc-wc-gateway.js', array( 'jquery', 'gc-dropin' ), '1.2.1' );
     
         $gcGatewayVars = [
             'ajax_url'          => admin_url('admin-ajax.php'),
@@ -136,6 +137,9 @@ class gc_ob_wc_gateway {
         ];
 
         wp_localize_script( 'gc-wc-gateway', 'gcGateway', $gcGatewayVars );
+
+        // style
+        wp_enqueue_style('gc-wc-gateway-style', GCOB_CSS_DIR . '/gc-wc-gateway.css', array(), '1.2.1');
     }
 
 
