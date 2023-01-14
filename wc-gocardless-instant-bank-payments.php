@@ -28,6 +28,7 @@ define( 'GCOB_API_VERSION',                   '2015-07-06' );
 define( 'GCOB_WC_ORDER_RECIEVED_URL',         '/order-recieved' );
 define( 'GCOB_WEBHOOK_NAMESPACE',             'gateway_gc_wc/v1' );
 define( 'GCOB_WEBHOOK_ROUTE_PAYMENTS',        'payments' );
+define( 'GCOB_PREMIUM_URL',                   'https://www.gnar.co.uk/product/wc-gocardless-instant-bank-payments-plus/' );
 
 
 

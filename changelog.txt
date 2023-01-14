@@ -1,7 +1,8 @@
 *** Changelog ***
 
 = 1.2.1 - 14-01-2023 =
-* Payment flow triggered on button click rather than checkout submit to improve stability
+* Added link to premium version - supports recurring payments (WooCommerce subscriptions)
+* Added temporary notice to customer above GoCardless checkout flow - requesting customer to close the flow using close button.
 
 = 1.2.0 - 22-10-2022 =
 * Payment flow triggered on button click rather than checkout submit to improve stability

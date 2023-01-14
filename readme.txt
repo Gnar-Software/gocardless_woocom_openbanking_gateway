@@ -1,6 +1,6 @@
 === Instant Bank Payments via GoCardless for WooCommerce ===
 Contributors: Gnar-Software, adamkentdev
-Tags: gocardless, go cardless, instant bank pay, open banking, woocommerce, payment, gateway, bank transfer, credit card, card payments
+Tags: gocardless, go cardless, instant bank pay, open banking, woocommerce, payment, gateway, bank transfer, credit card, card payments, prevent fraud, security, subscriptions, recurring payments
 Requires at least: 5.8
 Tested up to: 6.1
 Requires PHP: 7.3
@@ -23,6 +23,8 @@ Simple setup with Sandbox testing mode.
 
 Customers complete the transaction without leaving your checkout page.
 
+<a href="https://www.gnar.co.uk/product/wc-gocardless-instant-bank-payments-plus/">Purchase the premium version here</a> - Integrates with WooCoommerce subscriptions enabling you to take recurring payments via direct debit whilst still benefitting from taking the first payment by instant bank payment.
+
 
 == Frequently Asked Questions ==
 = Why use instant bank payments? =
@@ -42,7 +44,7 @@ Currently, Instant Bank Pay is available for your customers based in the UK, and
 
 = Does the plugin integrate with WooCommerce subscriptions? =
 
-No, but we will soon be releasing a premium plugin that will enable you to integrate with WooCoommerce subscriptions and set up direct debit mandates whilst still taking the first payment by instant bank payment.
+No, but you can purchase the premium version of this plugin <a href="https://www.gnar.co.uk/product/wc-gocardless-instant-bank-payments-plus/">here</a> which does. The premium version integrates with WooCoommerce subscriptions enabling you to take recurring payments via direct debit whilst still taking the first payment by instant bank payment.
 
 = Do I need an SSL certificate? =
 
