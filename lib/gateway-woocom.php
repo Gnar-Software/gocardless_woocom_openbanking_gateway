@@ -182,7 +182,13 @@ class gateway_woocom extends WC_Payment_Gateway {
             // else .. Customer bank authorised / awaiting payment
             $orderNote = 'GoCardless Instant bank payment authorised (awaiting payment): CustomerID - ' . $this->customerID . ' PaymentRef - ' . $this->paymentRef . ' PaymentID - ' . $this->paymentID;
             $logger->info('GC payment was successful but payment is still pending at checkout completion -> order: ' . $order_id, array( 'source' => 'GoCardless Gateway' ));
-            $order->update_status('pending_payment', $orderNote);
+
+            if ($order->has_status('pending')) {
+                $order->add_order_note($orderNote);
+            }
+            else {
+                $order->update_status('pending_payment', $orderNote);
+            }
         }
 
         // Empty cart
