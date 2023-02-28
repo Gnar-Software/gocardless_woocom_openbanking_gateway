@@ -1,5 +1,8 @@
 *** Changelog ***
 
+= 1.2.3 = 28-02-2023 =
+* Increased GC drop-in script version number - resolving cached close button bug
+
 = 1.2.2 - 29-01-2023 =
 * Bug fix - Close button not clicked - order not captured. Change at GoCardless end - onSuccess event fired on payment success rather than modal close.
 * Customer notice (click close button) removed
