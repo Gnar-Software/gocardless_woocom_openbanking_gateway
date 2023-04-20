@@ -170,7 +170,7 @@ class gc_ob_wc_gateway {
 
         // init billing request
         $this->instantiateGateway();
-        $this->gatewayGocardless->initBillingRequest();
+        $this->gatewayGocardless->initBillingRequest($this->gatewayWoocom);
 
     }
 

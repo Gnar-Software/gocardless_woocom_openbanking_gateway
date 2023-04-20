@@ -36,12 +36,14 @@ class gateway_gocardless {
 
     /**
      *  INIT BILLING REQUEST
+     * 
+     * @param gateway_woocom $gatewayWoocom
      */
 
-    public function initBillingRequest() {
+    public function initBillingRequest(gateway_woocom $gatewayWoocom) {
+
         global $woocommerce;
         $response = [];
-
 
         // prepare order details
         $this->paymentAmount = round($woocommerce->cart->total * 100, 2);
@@ -81,6 +83,10 @@ class gateway_gocardless {
             $this->billingRequestFlowID = $billingRequestFlowResponse->billing_request_flows->id;
             $response['BR_Flow_ID'] = $this->billingRequestFlowID;
         }
+
+        
+        // create order early
+        $gatewayWoocom->manualCreateOrder($this->billingRequestID);
 
         $response['status'] = 'success';
 

@@ -124,76 +124,46 @@ class gateway_woocom extends WC_Payment_Gateway {
 
 
     /**
-     *  CREATE ORDER
+     *  WC INVOKED PROCESS PAYMENT METHOD
      */
 
     public function process_payment($order_id) {
-        global $woocommerce;
-        $logger = wc_get_logger();
 
-        $order = new WC_Order( $order_id );
-
-        // Error receiving customer ID, payment reference or payment ID (shouldn't get here)
-        if (empty($_POST['gc_ob_customer_id']) || empty($_POST['gc_ob_payment_ref']) || empty($_POST['gc_ob_payment_id'])) {
-
-            if ($order->has_status('pending')) {
-                $order->add_order_note('Error recieving payment reference from GC');
-            }
-            else {
-                $order->update_status('pending', __( 'Error recieving payment reference from GC' , 'woocommerce' ));
-            }
-
-            $logger->error('Error recieving customer ID | payment ref | payment ID from GC', array( 'source' => 'GoCardless Gateway' ));
-            wc_add_notice( __('GoCardless payment error: error recieving payment reference from GC', 'woothemes'), 'error' );
-
-            return;
-        }
-
-        // Set payment details
-        $this->customerID = sanitize_text_field($_POST['gc_ob_customer_id']);
-        $this->paymentRef = sanitize_text_field($_POST['gc_ob_payment_ref']);
-        $this->paymentID  = sanitize_text_field($_POST['gc_ob_payment_id']);
-
-        $logger->info('Reached process payment without errors. Saving: ' . 
-            $this->customerID . ' ' . $this->paymentRef . ' ' . $this->paymentID, 
-            array( 'source' => 'GoCardless Gateway' ));  
-
-        update_post_meta( $order_id, 'gc_ob_customer_id', $this->customerID );
-        update_post_meta( $order_id, 'gc_ob_payment_ref', $this->paymentRef );
-        update_post_meta( $order_id, 'gc_ob_payment_id', $this->paymentID );      
-
-        // get payment status
-        $this->paymentStatus = $this->verifyPayment();
-
-        // Bail if payment status is failed
-        if ($this->paymentStatus == 'failed') {
-            $order->update_status('failed', 'GC Payment was declined by the customers bank');
-            $logger->info('GC payment was declined during checkout flow -> order: ' . $order_id, array( 'source' => 'GoCardless Gateway' ));
-            wc_add_notice( __('GoCardless payment error: payment was declined by your bank', 'woothemes'), 'error' );
-            return;
-        }
-
-        // set order status if it's confirmed
-        if ($this->paymentStatus == 'confirmed') {
-            $orderNote = 'GoCardless Payment Succesful: CustomerID - ' . $this->customerID . ' PaymentRef - ' . $this->paymentRef . ' PaymentID - ' . $this->paymentID;
-            $logger->info('GC payment was confirmed during checkout flow -> order: ' . $order_id, array( 'source' => 'GoCardless Gateway' ));
-            $order->update_status('processing', $orderNote);
-        }
-        else {
-            // else .. Customer bank authorised / awaiting payment
-            $orderNote = 'GoCardless Instant bank payment authorised (awaiting payment): CustomerID - ' . $this->customerID . ' PaymentRef - ' . $this->paymentRef . ' PaymentID - ' . $this->paymentID;
-            $logger->info('GC payment was successful but payment is still pending at checkout completion -> order: ' . $order_id, array( 'source' => 'GoCardless Gateway' ));
-            $order->update_status('pending_payment', $orderNote);
-        }
-
-        // Empty cart
-        $woocommerce->cart->empty_cart();
+        // payment is processed async using webhooks
 
         // Return thankyou redirect
         return array(
             'result' => 'success',
             'redirect' => $this->get_return_url( $order )
         );
+
+    }
+
+
+    /**
+     *  CREATE ORDER
+     * 
+     * @param int $billingRequestID
+     */
+    public function manualCreateOrder($billingRequestID) {
+
+        global $woocommerce;        
+        $logger = wc_get_logger();
+
+        $order = new WC_Order();
+
+        // Add billingRequestID to order
+        update_post_meta( $order->ID, 'gc_ob_billing_request_id', $billingRequestID ); 
+
+        if ($order->has_status('pending')) {
+            $order->add_order_note('Billing request ID: ' . $billingRequestID);
+        }
+        else {
+            $order->update_status('pending', 'Billing request ID: ' . $billingRequestID);
+        }
+
+        // Empty cart
+        //$woocommerce->cart->empty_cart();
 
     }
 
