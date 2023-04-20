@@ -78,6 +78,7 @@
         var requiredFields = getRequiredCheckoutFields(checkoutFields);
         formdata.append('required_fields', JSON.stringify(requiredFields));
 
+        console.log(JSON.stringify(checkoutFields));
         ajaxTriggerBillingRequest(formdata);
     }
 
@@ -118,6 +119,8 @@
         var responseObj = JSON.parse(response);
         sendNotice('Billing request, serverside checkout validation success');
 
+        // bail if order creation error
+
         // BAIL IF MODAL LAUNCH ERRORS
         if (responseObj.status == 'error') {
             console.log('Modal launch error: ' + JSON.stringify(responseObj.error));
@@ -148,6 +151,13 @@
             console.log('error: server response object does not contain flow ID or mode');
             sendError('error: server response object does not contain flow ID or mode');
             enableCheckoutBtn();
+            return;
+        }
+
+        // BAIL IF ORDER CREATION ERRORS
+        if (responseObj.order_create_error) {
+            console.log('Order creation error');
+            console.log(responseObj.order_create_error);
             return;
         }
 
@@ -207,6 +217,9 @@
         sendNotice('GC payment flow complete - submitting checkout form');
         enableCheckoutBtn();
         $('form.checkout').submit();
+
+        // redirect to order recieved
+
     }
 
 

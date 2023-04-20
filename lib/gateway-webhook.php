@@ -110,6 +110,8 @@ class gateway_webhook {
         $orderNote = '';
         $responseKey = 'event_' . $event->id;
 
+        $logger->info(json_encode($event), array( 'source' => 'GoCardless Gateway' ));
+
         // validate request
         if (empty($event->links->payment)) {
             $logger->error('Webhook payment event, paymentID was not in request event: webhookID = ' . $event->id, array( 'source' => 'GoCardless Gateway' ));

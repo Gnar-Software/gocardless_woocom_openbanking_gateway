@@ -3,7 +3,7 @@
 /*
  * Plugin Name: Instant Bank Payments via GoCardless for WooCommerce
  * Description: A payment gateway for WooCommerce and GoCardless. Take instant bank payments using open banking technology, payments clear almost instantly. Only available for customers in the UK and Germany.
- * Version: 1.2.3
+ * Version: 1.3.0
  * Author: gnar software
  * Author URI: https://www.gnar.co.uk/
  * License: GPLv2 or later
@@ -143,7 +143,7 @@ class gc_ob_wc_gateway {
 
 
     /**
-     *  INITIATE CLASSES FOR AJAX BILLING REQUEST
+     *  INITIATE AJAX BILLING REQUEST & ORDER CREATION
      */
 
     public function initBillingRequestController() {
@@ -170,7 +170,32 @@ class gc_ob_wc_gateway {
 
         // init billing request
         $this->instantiateGateway();
-        $this->gatewayGocardless->initBillingRequest();
+        $response = $this->gatewayGocardless->initBillingRequest();
+
+        // check customer_id is present before continuing
+        if (empty($response['customer_id'])) {
+            $errorResponse = [
+                'order_create_error' => 'Did not create order as did not receive customer ID from GC'
+            ];
+
+            die(json_encode($errorResponse));
+        }
+        else {
+            $gcCustomerID = $response['customer_id'];
+        }
+
+        // create order & attach customer id
+        $orderCreationResp = gateway_woocom::ajaxCreateOrder($gcCustomerID);
+
+        if (is_wp_error($orderCreationResp)) {
+            $response['order_create_error'] = $orderCreationResp->get_error_message();
+        }
+        else {
+            $response['order_id'] = $orderCreationResp;
+        }
+
+        // return response
+        die(json_encode($response));
 
     }
 
