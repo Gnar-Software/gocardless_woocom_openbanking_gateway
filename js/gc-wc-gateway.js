@@ -235,6 +235,7 @@
         console.log('Payment flow was not completed');
         displayWoocomErrors('Sorry we have not been able to process your payment - please retry');
         sendNotice('Payment flow was not completed');
+        $('body').removeClass('using-gc');
         enableCheckoutBtn();
 
         return;
