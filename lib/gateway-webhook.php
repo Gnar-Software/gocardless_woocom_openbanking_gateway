@@ -61,6 +61,9 @@ class gateway_webhook {
                 if ($event->resource_type == 'payments') {
                     $this->instantBankPaymentStatus($event);
                 }
+                else if ($event->resource_type == 'billing_requests') {
+                    $this->billingRequestHandler($event);
+                }
             }
             catch (Exception $e) {
                 $logger->error($e->getMessage(), array( 'source' => 'GoCardless Gateway' ));
@@ -100,9 +103,10 @@ class gateway_webhook {
 
 
     /**
-     *  INSTANT BANK PAYMENT STATUS CHANGE
+     * INSTANT BANK PAYMENT STATUS CHANGE
+     * 
+     * @param object $event
      */
-
     public function instantBankPaymentStatus($event) {
 
         $logger = wc_get_logger();
@@ -175,6 +179,39 @@ class gateway_webhook {
 
     }
 
+
+    /**
+     * BILLING REQUEST HANDLER
+     * 
+     * @param object $event
+     */
+    public function billingRequestHandler($event) {
+
+        $logger = wc_get_logger();
+
+        // bail if payment id or billing request id isn't present in event
+        if (empty($event->links->payment_request_payment) || empty($event->links->billing_request)) {
+            return;
+        }
+
+        // log event
+        $logger->info(json_encode($event), array( 'source' => 'GoCardless Gateway' ));
+
+        // find order with matching billing request ID that also doesn't have a payment ID
+        $orderID = $this->woocomObj->getOrderByBillingRequest($event->links->billing_request);
+        error_log('Billing request webhook - order to update: ' . $orderID);       
+
+        if (empty($orderID)) {
+            return;
+        }
+
+        // add payment ID to order
+        update_post_meta($orderID, 'gc_ob_payment_id', $event->links->payment_request_payment);
+
+        // verify payment
+        //$this->gocardlessObj->verifyPayment($this->paymentID);
+
+    }
 }
 
 ?>

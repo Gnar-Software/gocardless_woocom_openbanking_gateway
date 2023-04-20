@@ -124,26 +124,77 @@ class gateway_woocom extends WC_Payment_Gateway {
 
 
     /**
-     *  WC INVOKED PROCESS PAYMENT METHOD
+     * WC INVOKED PROCESS PAYMENT METHOD
+     * 
+     * @param int $order_id
+     * @return array $response
      */
-
     public function process_payment($order_id) {
 
-        // payment is processed async using webhooks
+        global $woocommerce;
+        $logger = wc_get_logger();
+
+        $order = new WC_Order($order_id);
+
+        // capture payment ref & ID if present
+        $this->customerID = sanitize_text_field($_POST['gc_ob_customer_id']);
+        $this->paymentRef = sanitize_text_field($_POST['gc_ob_payment_ref']);
+        $this->paymentID  = sanitize_text_field($_POST['gc_ob_payment_id']);
+
+        update_post_meta( $order_id, 'gc_ob_payment_ref', $this->paymentRef );
+        update_post_meta( $order_id, 'gc_ob_payment_id', $this->paymentID );
+        
+        // get payment status
+        $this->paymentStatus = $this->verifyPayment();
+
+        error_log('orderid ' . $order_id);
+        error_log($this->paymentStatus);
+
+        // Bail if payment status is failed
+        if ($this->paymentStatus == 'failed') {
+            $logger->info('GC payment was declined during checkout flow -> order: ' . $order_id, array( 'source' => 'GoCardless Gateway' ));
+            $order->update_status('failed', 'GC Payment was declined by the customers bank');
+            wc_add_notice( __('GoCardless payment error: payment was declined by your bank', 'woothemes'), 'error' );
+            return;
+        }
+
+        // set order status if it's confirmed
+        else if ($this->paymentStatus == 'confirmed') {
+            $orderNote = 'GoCardless Payment Succesful: CustomerID - ' . $this->customerID . ' PaymentRef - ' . $this->paymentRef . ' PaymentID - ' . $this->paymentID;
+            $logger->info('GC payment was confirmed during checkout flow -> order: ' . $order_id, array( 'source' => 'GoCardless Gateway' ));
+            $order->update_status('processing', $orderNote);
+        }
+
+        // else Customer bank authorised / awaiting payment
+        else {
+            $orderNote = 'GoCardless Instant bank payment authorised (awaiting payment): CustomerID - ' . $this->customerID . ' PaymentRef - ' . $this->paymentRef . ' PaymentID - ' . $this->paymentID;
+            $logger->info('GC payment was successful but payment is still pending at checkout completion -> order: ' . $order_id, array( 'source' => 'GoCardless Gateway' ));
+            if ($order->has_status('pending')) {
+                $order->add_order_note($orderNote);
+            }
+            else {
+                $order->update_status('pending', $orderNote);
+            }
+        }
+
+        // Empty cart
+        $woocommerce->cart->empty_cart();
+
+        // unset order awaiting payment from session to make way for further orders
+        WC()->session->__unset( 'order_awaiting_payment' );
 
         // Return thankyou redirect
-        return array(
-            'result' => 'success',
-            'redirect' => $this->get_return_url( $order )
-        );
+        return [
+            'result'   => 'success',
+            'redirect' => $this->get_return_url($order)
+        ];
 
     }
 
 
     /**
-     *  VERIFY PAYMENT WITH GOCARDLESS
+     * VERIFY PAYMENT WITH GOCARDLESS
      */
-
     public function verifyPayment() {
 
         /**
@@ -202,7 +253,6 @@ class gateway_woocom extends WC_Payment_Gateway {
         }
 
         return $errors;
-
     }
 
 
@@ -215,15 +265,17 @@ class gateway_woocom extends WC_Payment_Gateway {
      */
     public static function ajaxCreateOrder($gcCustomerID, $billingRequestID) {
 
-        $checkoutData = json_decode(stripslashes($_POST['checkout_fields']), true);
+        $logger = wc_get_logger();
 
         $checkout = new WC_Checkout();
+        $checkoutData = json_decode(stripslashes($_POST['checkout_fields']), true);
         $orderID = $checkout->create_order($checkoutData);
 
         /**
          * Check for order creation error - bail
          */
         if (is_wp_error($orderID)) {
+            $logger->error('Error creating order', ['source' => 'GoCardless Gateway']);
             return $orderID;
         }
 
@@ -232,7 +284,7 @@ class gateway_woocom extends WC_Payment_Gateway {
          * avoid subsequent duplicate orders being created, and return orderID
          */
         else {
-            // order created, return order id in filter to prevent duplicate order creation
+            // order created
             $response['order_id'] = $orderID;
 
             WC()->session->set( 'order_awaiting_payment', $orderID );
@@ -241,9 +293,42 @@ class gateway_woocom extends WC_Payment_Gateway {
             update_post_meta( $orderID, 'gc_ob_customer_id', $gcCustomerID );
             update_post_meta( $orderID, 'gc_ob_billing_request_id', $billingRequestID );
 
+            $logger->notice('Created order ' . $orderID . ' with ' . $gcCustomerID . ' ' . $billingRequestID, ['source' => 'GoCardless Gateway']);
         }
     }
 
+
+    /**
+     * GET THE FIRST ORDER WITH BILLING REQUEST ID WITHOUT A PAYMENT ID
+     * 
+     * @param string $billingRequestID
+     * @return int $orderID
+     */
+    public function getOrderByBillingRequest($billingRequestID) {
+
+        $query = new WP_Query([
+            'post_type'     => 'shop_order',
+            'nopaging'      => true,
+            'meta_query'    => [
+                'relation'      => 'AND',
+                [
+                    'key'       => 'gc_ob_billing_request_id',
+                    'value'     => $billingRequestID,
+                    'compare'   => '='
+                ],
+                [
+                    'key'       => 'gc_ob_payment_id',
+                    'compare'   => 'NOT EXISTS'
+                ]
+            ]
+        ]);
+
+        while ($query->have_posts()) {
+            $query->the_post();
+            return get_the_ID();
+        }
+
+    }
 
 }
 

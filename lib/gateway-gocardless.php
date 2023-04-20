@@ -74,8 +74,6 @@ class gateway_gocardless {
             $response['customer_id'] = $this->gcCustomerID;
         }
 
-        error_log(json_encode($billingRequestResponse));
-
         // billing request flow
         $billingRequestFlowResponse = $this->createBillingRequestFlow();
 
@@ -176,6 +174,7 @@ class gateway_gocardless {
      * @return string $paymentDescription
      */
     private function createPaymentDesc() {
+
         global $woocommerce;
         $paymentDescription = [];
 
@@ -198,8 +197,6 @@ class gateway_gocardless {
 
         $getURL = $this->apiBaseURL . GCOB_PAYMENTS_ENDPOINT . '/' . $paymentID;
         $response = $this->getAPIRequest($getURL);
-
-        error_log(json_encode($response), 0);
         
         $status = '';
 
