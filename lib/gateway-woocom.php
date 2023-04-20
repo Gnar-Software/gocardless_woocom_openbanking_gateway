@@ -147,8 +147,8 @@ class gateway_woocom extends WC_Payment_Gateway {
      */
     public function manualCreateOrder($billingRequestID) {
 
-        global $woocommerce;        
-        $logger = wc_get_logger();
+        update_post_meta( $order_id, 'gc_ob_payment_ref', $this->paymentRef );
+        update_post_meta( $order_id, 'gc_ob_payment_id', $this->paymentID );      
 
         $order = new WC_Order();
 
@@ -159,7 +159,16 @@ class gateway_woocom extends WC_Payment_Gateway {
             $order->add_order_note('Billing request ID: ' . $billingRequestID);
         }
         else {
-            $order->update_status('pending', 'Billing request ID: ' . $billingRequestID);
+            // else .. Customer bank authorised / awaiting payment
+            $orderNote = 'GoCardless Instant bank payment authorised (awaiting payment): CustomerID - ' . $this->customerID . ' PaymentRef - ' . $this->paymentRef . ' PaymentID - ' . $this->paymentID;
+            $logger->info('GC payment was successful but payment is still pending at checkout completion -> order: ' . $order_id, array( 'source' => 'GoCardless Gateway' ));
+
+            if ($order->has_status('pending')) {
+                $order->add_order_note($orderNote);
+            }
+            else {
+                $order->update_status('pending_payment', $orderNote);
+            }
         }
 
         // Empty cart
@@ -201,7 +210,6 @@ class gateway_woocom extends WC_Payment_Gateway {
 
         return $paymentStatus;
 
-
     }
 
 
@@ -234,6 +242,42 @@ class gateway_woocom extends WC_Payment_Gateway {
 
     }
 
+
+    /**
+     * AJAX CREATE ORDER
+     * 
+     * @param  string $gcCustomerID
+     * @return int|WP_ERROR $orderID
+     */
+    public static function ajaxCreateOrder(string $gcCustomerID) {
+
+        $checkoutData = json_decode(stripslashes($_POST['checkout_fields']), true);
+
+        $checkout = new WC_Checkout();
+        $orderID = $checkout->create_order($checkoutData);
+
+        /**
+         * Check for order creation error - bail
+         */
+        if (is_wp_error($orderID)) {
+            return $orderID;
+        }
+
+        /**
+         * Else order created - set order_awaiting_payment session var to 
+         * avoid subsequent duplicate orders being created, and return orderID
+         */
+        else {
+            // order created, return order id in filter to prevent duplicate order creation
+            $response['order_id'] = $orderID;
+
+            WC()->session->set( 'order_awaiting_payment', $orderID );
+
+            // add GC customer ID to order data
+            update_post_meta( $orderID, 'gc_ob_customer_id', $gcCustomerID );
+
+        }
+    }
 
 
 }

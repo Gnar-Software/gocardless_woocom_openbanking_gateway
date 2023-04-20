@@ -69,6 +69,11 @@ class gateway_gocardless {
             $this->billingRequestID = $billingRequestResponse->billing_requests->id;
         }
 
+        if (isset($billingRequestResponse->billing_requests->resources->customer->id)) {
+            $this->gcCustomerID = $billingRequestResponse->billing_requests->resources->customer->id;
+            $response['customer_id'] = $this->gcCustomerID;
+        }
+        error_log(json_encode($billingRequestResponse));
 
         // billing request flow
         $billingRequestFlowResponse = $this->createBillingRequestFlow();
@@ -90,7 +95,7 @@ class gateway_gocardless {
 
         $response['status'] = 'success';
 
-        die(json_encode($response));
+        return $response;
     }
 
 
