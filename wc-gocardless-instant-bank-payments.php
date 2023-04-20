@@ -64,9 +64,11 @@ class gc_ob_wc_gateway {
 
 
     /**
-     *  ADD GATEWAY TO WOOCOM GATEWAYS
+     * ADD GATEWAY TO WOOCOM GATEWAYS
+     * 
+     * @param array $gateways
+     * @return array $gateways
      */
-
     public function addGateway($gateways) {
         array_push($gateways, 'gateway_woocom');
         return $gateways;
@@ -74,9 +76,8 @@ class gc_ob_wc_gateway {
 
 
     /**
-     *  INSTANTIATE GATEWAY
+     * INSTANTIATE GATEWAY
      */
-
     public function instantiateGateway() {
 
         if (!class_exists('WooCommerce')) {
@@ -115,15 +116,14 @@ class gc_ob_wc_gateway {
             new gateway_webhook($this->gatewayWoocom, $this->gatewayGocardless);
 
         }
-
     }
 
 
     /**
-     *  ENQUEUE & LOCALIZE SCRIPTS
+     * ENQUEUE & LOCALIZE SCRIPTS
      */
-
     public function enqueueScripts() {
+
         wp_enqueue_script( 'gc-dropin', GCOB_JS_DROPIN_URI, array(), '1.0.1' );
         wp_enqueue_script( 'gc-wc-gateway', GCOB_JS_DIR . '/gc-wc-gateway.js', array( 'jquery', 'gc-dropin' ), '1.2.2' );
     
@@ -138,14 +138,12 @@ class gc_ob_wc_gateway {
         ];
 
         wp_localize_script( 'gc-wc-gateway', 'gcGateway', $gcGatewayVars );
-
     }
 
 
     /**
-     *  INITIATE AJAX BILLING REQUEST & ORDER CREATION
+     * INITIATE AJAX BILLING REQUEST & ORDER CREATION
      */
-
     public function initBillingRequestController() {
 
         // authorize
@@ -180,12 +178,23 @@ class gc_ob_wc_gateway {
 
             die(json_encode($errorResponse));
         }
+
+        // check billing request ID is present before continuing
+        if (empty($response['billing_request_id'])) {
+            $errorResponse = [
+                'order_create_error' => 'Did not create order as did not receive billing request ID from GC'
+            ];
+
+            die(json_encode($errorResponse));
+        }
+
         else {
             $gcCustomerID = $response['customer_id'];
+            $billingRequestID = $response['billing_request_id'];
         }
 
         // create order & attach customer id
-        $orderCreationResp = gateway_woocom::ajaxCreateOrder($gcCustomerID);
+        $orderCreationResp = gateway_woocom::ajaxCreateOrder($gcCustomerID, $billingRequestID);
 
         if (is_wp_error($orderCreationResp)) {
             $response['order_create_error'] = $orderCreationResp->get_error_message();
@@ -196,10 +205,8 @@ class gc_ob_wc_gateway {
 
         // return response
         die(json_encode($response));
-
     }
-
-
+    
 }
 
 new gc_ob_wc_gateway();

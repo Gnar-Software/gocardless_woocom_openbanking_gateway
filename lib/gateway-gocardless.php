@@ -35,12 +35,11 @@ class gateway_gocardless {
 
 
     /**
-     *  INIT BILLING REQUEST
+     * INIT BILLING REQUEST
      * 
-     * @param gateway_woocom $gatewayWoocom
+     * @return array $response
      */
-
-    public function initBillingRequest(gateway_woocom $gatewayWoocom) {
+    public function initBillingRequest() {
 
         global $woocommerce;
         $response = [];
@@ -67,12 +66,14 @@ class gateway_gocardless {
         
         if (isset($billingRequestResponse->billing_requests->id)) {
             $this->billingRequestID = $billingRequestResponse->billing_requests->id;
+            $response['billing_request_id'] = $this->billingRequestID;
         }
 
         if (isset($billingRequestResponse->billing_requests->resources->customer->id)) {
             $this->gcCustomerID = $billingRequestResponse->billing_requests->resources->customer->id;
             $response['customer_id'] = $this->gcCustomerID;
         }
+
         error_log(json_encode($billingRequestResponse));
 
         // billing request flow
@@ -89,10 +90,6 @@ class gateway_gocardless {
             $response['BR_Flow_ID'] = $this->billingRequestFlowID;
         }
 
-        
-        // create order early
-        $gatewayWoocom->manualCreateOrder($this->billingRequestID);
-
         $response['status'] = 'success';
 
         return $response;
@@ -100,18 +97,18 @@ class gateway_gocardless {
 
 
     /**
-     *  RETRIEVE GC CUSTOMER
+     * RETRIEVE GC CUSTOMER
      */
-
     private function retrieveCustomer($customerEmail) {
         
     }
 
 
     /**
-     *  CREATE BILLING REQUEST
+     * CREATE BILLING REQUEST
+     * 
+     * @return object $response
      */
-
     public function createBillingRequest() {
         $params = (object) [];
 
@@ -152,9 +149,10 @@ class gateway_gocardless {
 
 
     /**
-     *  CREATE BILLING REQUEST FLOW
+     * CREATE BILLING REQUEST FLOW
+     * 
+     * @return object $response
      */
-
     public function createBillingRequestFlow() {
 
         $params = (object) [
@@ -173,9 +171,10 @@ class gateway_gocardless {
 
 
     /**
-     *  CREATE PAYMENT DESCRIPTION
+     * CREATE PAYMENT DESCRIPTION
+     * 
+     * @return string $paymentDescription
      */
-
     private function createPaymentDesc() {
         global $woocommerce;
         $paymentDescription = [];
@@ -190,11 +189,11 @@ class gateway_gocardless {
 
 
     /**
-     *  VERIFY PAYMENT STATUS
-     *  @param string payment id
-     *  @return string payment status
+     * VERIFY PAYMENT STATUS
+     * 
+     * @param string payment id
+     * @return string payment status
      */
-
     public function verifyPayment($paymentID) {
 
         $getURL = $this->apiBaseURL . GCOB_PAYMENTS_ENDPOINT . '/' . $paymentID;
@@ -209,14 +208,16 @@ class gateway_gocardless {
         }
 
         return $status;
-
     }
 
 
     /**
-     *  SEND API POST REQUEST
+     * SEND API POST REQUEST
+     * 
+     * @param object $body
+     * @param string $endpoint
+     * @return object $responseObj
      */
-
     private function postAPIRequest($body, $endpoint) {
         $response = '';
 
@@ -247,9 +248,11 @@ class gateway_gocardless {
 
 
     /**
-     *  SEND API GET REQUEST
+     * SEND API GET REQUEST
+     * 
+     * @param string URI
+     * @return object $responseObj
      */
-
     private function getAPIRequest($URI) {
 
         $response = wp_remote_get($URI, [

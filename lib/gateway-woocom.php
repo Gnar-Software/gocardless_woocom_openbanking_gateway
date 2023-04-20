@@ -141,43 +141,6 @@ class gateway_woocom extends WC_Payment_Gateway {
 
 
     /**
-     *  CREATE ORDER
-     * 
-     * @param int $billingRequestID
-     */
-    public function manualCreateOrder($billingRequestID) {
-
-        update_post_meta( $order_id, 'gc_ob_payment_ref', $this->paymentRef );
-        update_post_meta( $order_id, 'gc_ob_payment_id', $this->paymentID );      
-
-        $order = new WC_Order();
-
-        // Add billingRequestID to order
-        update_post_meta( $order->ID, 'gc_ob_billing_request_id', $billingRequestID ); 
-
-        if ($order->has_status('pending')) {
-            $order->add_order_note('Billing request ID: ' . $billingRequestID);
-        }
-        else {
-            // else .. Customer bank authorised / awaiting payment
-            $orderNote = 'GoCardless Instant bank payment authorised (awaiting payment): CustomerID - ' . $this->customerID . ' PaymentRef - ' . $this->paymentRef . ' PaymentID - ' . $this->paymentID;
-            $logger->info('GC payment was successful but payment is still pending at checkout completion -> order: ' . $order_id, array( 'source' => 'GoCardless Gateway' ));
-
-            if ($order->has_status('pending')) {
-                $order->add_order_note($orderNote);
-            }
-            else {
-                $order->update_status('pending_payment', $orderNote);
-            }
-        }
-
-        // Empty cart
-        //$woocommerce->cart->empty_cart();
-
-    }
-
-
-    /**
      *  VERIFY PAYMENT WITH GOCARDLESS
      */
 
@@ -247,9 +210,10 @@ class gateway_woocom extends WC_Payment_Gateway {
      * AJAX CREATE ORDER
      * 
      * @param  string $gcCustomerID
+     * @param  int $billingRequestID
      * @return int|WP_ERROR $orderID
      */
-    public static function ajaxCreateOrder(string $gcCustomerID) {
+    public static function ajaxCreateOrder($gcCustomerID, $billingRequestID) {
 
         $checkoutData = json_decode(stripslashes($_POST['checkout_fields']), true);
 
@@ -273,8 +237,9 @@ class gateway_woocom extends WC_Payment_Gateway {
 
             WC()->session->set( 'order_awaiting_payment', $orderID );
 
-            // add GC customer ID to order data
+            // add GC customer ID & BR ID to order data
             update_post_meta( $orderID, 'gc_ob_customer_id', $gcCustomerID );
+            update_post_meta( $orderID, 'gc_ob_billing_request_id', $billingRequestID );
 
         }
     }
