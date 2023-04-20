@@ -1,5 +1,8 @@
 *** Changelog ***
 
+= 1.3.0 - 21-04-2023 =
+* Implemented patch to resolve issue whereby order is not always captured.
+
 = 1.2.4 - 01-03-2023 =
 * Fixed change log issue that prevented v1.2.3 being committed to svn fully
 
