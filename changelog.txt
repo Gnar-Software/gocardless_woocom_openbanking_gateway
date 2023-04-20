@@ -1,5 +1,8 @@
 *** Changelog ***
 
+= 1.2.4 - 01-03-2023 =
+* Fixed change log issue that prevented v1.2.3 being committed to svn fully
+
 = 1.2.3 - 28-02-2023 =
 * Increased GC drop-in script version number - resolving cached close button bug
 
