@@ -5,6 +5,7 @@
 * WC Order now created at the point of payment initiation
 * Added billing_request webhook handler to add payment ID to orders where it doesn't already exists
 * Changed main js script name to avoid caching issues
+* Bug fix - another payment option pre-selected on checkout load caused GC flow not to be triggered
 
 = 1.2.4 - 01-03-2023 =
 * Fixed change log issue that prevented v1.2.3 being committed to svn fully

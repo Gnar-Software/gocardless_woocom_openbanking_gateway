@@ -260,8 +260,6 @@ class gateway_gocardless {
             ]
         ]);
 
-        error_log('get response: ' . json_encode($response));
-
         if (is_wp_error($response)) {
             error_log('GCOB error: ' . $response->get_error_message());
         }

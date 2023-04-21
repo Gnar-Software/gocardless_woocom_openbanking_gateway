@@ -10,15 +10,13 @@
 
         // CHECKOUT SUBMIT BUTTON CLICK
         let checkoutForm  = $( 'form.woocommerce-checkout' );
-        let paymentMethod = $( 'form.checkout input[name="payment_method"]:checked' );
 
         $(checkoutForm).on( 'click', ':submit', function(e) {
 
             checkoutSubmitBtn = this;
-
             console.log('btn clicked');
 
-            var payment_method = $( paymentMethod ).val();
+            var payment_method = $('.woocommerce-page input[type=radio][name=payment_method]:checked').val();
 
             if (payment_method == 'gc_ob_wc_gateway') {
 
