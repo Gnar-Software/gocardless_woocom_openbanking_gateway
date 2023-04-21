@@ -65,7 +65,6 @@ class gateway_woocom extends WC_Payment_Gateway {
     /**
      *  WOOCOM PAYMENT METHOD SETTING FIELDS
      */
-
     public function init_form_fields() {
 
         $webhookURL = get_home_url() . '/wp-json/' . GCOB_WEBHOOK_NAMESPACE . '/' . GCOB_WEBHOOK_ROUTE_PAYMENTS;
@@ -230,7 +229,6 @@ class gateway_woocom extends WC_Payment_Gateway {
     /**
      *  CHECKOUT FIELD VALIDATION
      */
-
     public static function gcValidateCheckoutFields($errors, $checkoutFields, $requiredFields) {
 
         $checkoutFields = json_decode(stripslashes($checkoutFields), true);
@@ -302,32 +300,29 @@ class gateway_woocom extends WC_Payment_Gateway {
      * GET THE FIRST ORDER WITH BILLING REQUEST ID WITHOUT A PAYMENT ID
      * 
      * @param string $billingRequestID
-     * @return int $orderID
+     * @return WC_Order|null $order
      */
     public function getOrderByBillingRequest($billingRequestID) {
 
-        $query = new WP_Query([
-            'post_type'     => 'shop_order',
-            'nopaging'      => true,
-            'meta_query'    => [
-                'relation'      => 'AND',
-                [
-                    'key'       => 'gc_ob_billing_request_id',
-                    'value'     => $billingRequestID,
-                    'compare'   => '='
-                ],
-                [
-                    'key'       => 'gc_ob_payment_id',
-                    'compare'   => 'NOT EXISTS'
-                ]
-            ]
+        $orders = wc_get_orders([
+            'limit'        => -1,
+            'orderby'      => 'date',
+            'order'        => 'DESC',
+            'meta_key'     => 'gc_ob_billing_request_id',
+            'meta_value'   => $billingRequestID
         ]);
 
-        while ($query->have_posts()) {
-            $query->the_post();
-            return get_the_ID();
+        if (!empty($orders)) {
+            foreach ($orders as $order) {
+                $paymentID = get_post_meta($order->get_id(), 'gc_ob_payment_id');
+
+                if (empty($paymentID)) {
+                    return $order;
+                }
+            }
         }
 
+        return;
     }
 
 }

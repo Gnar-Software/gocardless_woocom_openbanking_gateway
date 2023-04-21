@@ -70,7 +70,6 @@ class gateway_webhook {
                 error_log($e->getMessage());
             }
         }
-
         
         // return succesful response
         $this->response->set_data($this->responseData);
@@ -113,8 +112,6 @@ class gateway_webhook {
         $orderStatus = '';
         $orderNote = '';
         $responseKey = 'event_' . $event->id;
-
-        $logger->info(json_encode($event), array( 'source' => 'GoCardless Gateway' ));
 
         // validate request
         if (empty($event->links->payment)) {
@@ -167,10 +164,10 @@ class gateway_webhook {
                     $order->update_status($orderStatus, $orderNote);
                 }
 
-                $logger->info('Webhook payment event, order: ' . $order->id . ' status updated to: ' . $orderStatus . ' paymentID = ' . $event->links->payment . ' webhookID = ' . $event->id, array( 'source' => 'GoCardless Gateway' ));
+                $logger->info('Webhook payment event, order: ' . $order->get_id() . ' status updated to: ' . $orderStatus . ' paymentID = ' . $event->links->payment . ' webhookID = ' . $event->id, array( 'source' => 'GoCardless Gateway' ));
             }
             else {
-                $logger->info('Webhook payment event, order: ' . $order->id . ' payment status is updated but order status stays the same. PaymentID = ' . $paymentID .  $event->links->payment . ' webhookID = ' . $event->id, array( 'source' => 'GoCardless Gateway' ));
+                $logger->info('Webhook payment event, order: ' . $order->get_id() . ' payment status is updated but order status stays the same. PaymentID = ' . $event->links->payment . ' webhookID = ' . $event->id, array( 'source' => 'GoCardless Gateway' ));
             }
         }
         else {
@@ -181,7 +178,7 @@ class gateway_webhook {
 
 
     /**
-     * BILLING REQUEST HANDLER
+     * BILLING REQUEST HANDLER TO ADD PAYMENT ID TO ORDER WHERE MISSING
      * 
      * @param object $event
      */
@@ -194,22 +191,16 @@ class gateway_webhook {
             return;
         }
 
-        // log event
-        $logger->info(json_encode($event), array( 'source' => 'GoCardless Gateway' ));
-
         // find order with matching billing request ID that also doesn't have a payment ID
-        $orderID = $this->woocomObj->getOrderByBillingRequest($event->links->billing_request);
-        error_log('Billing request webhook - order to update: ' . $orderID);       
-
-        if (empty($orderID)) {
+        $order = $this->woocomObj->getOrderByBillingRequest($event->links->billing_request);
+ 
+        if (empty($order)) {
             return;
         }
 
         // add payment ID to order
-        update_post_meta($orderID, 'gc_ob_payment_id', $event->links->payment_request_payment);
-
-        // verify payment
-        //$this->gocardlessObj->verifyPayment($this->paymentID);
+        $logger->info('Billing request webhook - adding paymentID to order: ' . $order->get_id() . ' ' . $event->links->payment_request_payment, array( 'source' => 'GoCardless Gateway' )); 
+        update_post_meta($order->get_id(), 'gc_ob_payment_id', $event->links->payment_request_payment);
 
     }
 }

@@ -125,7 +125,7 @@ class gc_ob_wc_gateway {
     public function enqueueScripts() {
 
         wp_enqueue_script( 'gc-dropin', GCOB_JS_DROPIN_URI, array(), '1.0.1' );
-        wp_enqueue_script( 'gc-wc-gateway', GCOB_JS_DIR . '/gc-wc-gateway.js', array( 'jquery', 'gc-dropin' ), '1.2.2' );
+        wp_enqueue_script( 'gc-wc-gateway', GCOB_JS_DIR . '/gc-ob-wc-gateway.js', array( 'jquery', 'gc-dropin' ), '1.2.2' );
     
         $gcGatewayVars = [
             'ajax_url'          => admin_url('admin-ajax.php'),
