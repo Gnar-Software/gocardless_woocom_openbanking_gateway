@@ -1,5 +1,8 @@
 *** Changelog ***
 
+= 1.3.1 - 12-10-2023 =
+* Added ship_to_different_address handling to ensure shipping address is filled from billing address when required
+
 = 1.3.0 - 21-04-2023 =
 * Implemented patch to resolve issue whereby order is not always captured.
 * WC Order now created at the point of payment initiation

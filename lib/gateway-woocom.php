@@ -267,6 +267,17 @@ class gateway_woocom extends WC_Payment_Gateway {
 
         $checkout = new WC_Checkout();
         $checkoutData = json_decode(stripslashes($_POST['checkout_fields']), true);
+
+        // fill shipping address from billing if required
+        if (empty($checkoutData['ship_to_different_address'])) {
+            foreach ($checkoutData as $key => $value) {
+                if (strpos($key, 'billing_') !== false) {
+                    $shippingFieldKey = str_replace('billing_', 'shipping_', $key);
+                    $checkoutData[$shippingFieldKey] = $value;
+                }
+            }
+        }
+
         $orderID = $checkout->create_order($checkoutData);
 
         /**
