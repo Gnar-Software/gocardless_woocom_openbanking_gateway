@@ -25,14 +25,14 @@ class gateway_woocom extends WC_Payment_Gateway {
         $this->method_title = 'GoCardless Instant Bank Pay';
         $this->method_description = 'Instant bank payments using open banking technology. <br/><br/>Support recurring payments with Instant Bank Pay for WooCommerce via GoCardless Premium Plugin <a href="' . GCOB_PREMIUM_URL . '">available here</a>. <i>(Requires WooCommerce Subscriptions)</i>';
 
-        //if (!defined('DOING_AJAX') || !DOING_AJAX) {
+        if (!defined('DOING_AJAX') || !DOING_AJAX) {
             // settings
             $this->init_form_fields();
             $this->init_settings();
 
             // save settings hook
             add_action( 'woocommerce_update_options_payment_gateways_' . $this->id, [$this, 'process_admin_options'] );
-        //}
+        }
 
         if ($this->get_option('test_mode') == 'yes') {
             $this->testMode = true;
