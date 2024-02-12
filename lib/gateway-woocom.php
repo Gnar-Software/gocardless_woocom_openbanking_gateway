@@ -16,7 +16,6 @@ class gateway_woocom extends WC_Payment_Gateway {
     public string $paymentID;
     public string $paymentStatus;
 
-
     public function __construct() {
 
         // define gateway properties
@@ -26,14 +25,14 @@ class gateway_woocom extends WC_Payment_Gateway {
         $this->method_title = 'GoCardless Instant Bank Pay';
         $this->method_description = 'Instant bank payments using open banking technology. <br/><br/>Support recurring payments with Instant Bank Pay for WooCommerce via GoCardless Premium Plugin <a href="' . GCOB_PREMIUM_URL . '">available here</a>. <i>(Requires WooCommerce Subscriptions)</i>';
 
-        if (!defined('DOING_AJAX') || !DOING_AJAX) {
+        //if (!defined('DOING_AJAX') || !DOING_AJAX) {
             // settings
             $this->init_form_fields();
             $this->init_settings();
 
             // save settings hook
             add_action( 'woocommerce_update_options_payment_gateways_' . $this->id, [$this, 'process_admin_options'] );
-        }
+        //}
 
         if ($this->get_option('test_mode') == 'yes') {
             $this->testMode = true;
@@ -146,7 +145,7 @@ class gateway_woocom extends WC_Payment_Gateway {
         // get payment status
         $this->paymentStatus = $this->verifyPayment();
 
-        error_log('orderid ' . $order_id);
+        error_log('GoCardless processing payment for orderid ' . $order_id);
         error_log($this->paymentStatus);
 
         // Bail if payment status is failed
@@ -274,9 +273,15 @@ class gateway_woocom extends WC_Payment_Gateway {
                 if (strpos($key, 'billing_') !== false) {
                     $shippingFieldKey = str_replace('billing_', 'shipping_', $key);
                     $checkoutData[$shippingFieldKey] = $value;
+                    WC()->customer->set_props([$shippingFieldKey => $value]);
                 }
             }
         }
+
+        WC()->customer->save();
+		WC()->cart->calculate_shipping();
+
+        WC()->session->set('chosen_payment_method', 'gc_ob_wc_gateway');
 
         $orderID = $checkout->create_order($checkoutData);
 
